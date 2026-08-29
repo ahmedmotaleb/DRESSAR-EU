@@ -1,8 +1,9 @@
 # Dressar Ireland — Shopify theme
 
-A complete, custom Shopify theme for **Dressar's Irish/EU storefront**
-(`ntizm6-fs.myshopify.com`). Built from scratch for the Irish market: euro
-pricing, Irish delivery expectations, EU consumer law, and GDPR cookie consent.
+A complete, custom Shopify theme for **Dressar's EU storefront** —
+[dressar.eu](https://dressar.eu) (`ntizm6-fs.myshopify.com`), trading from
+Roscommon, Ireland. Built for the Irish market: euro pricing, Irish delivery
+expectations, EU consumer law, and GDPR cookie consent.
 
 It is a standalone theme — no theme framework, no build step, no npm install.
 Zip it and upload, or push it with the Shopify CLI.
@@ -47,31 +48,46 @@ shopify theme push  --store ntizm6-fs.myshopify.com   # upload
 
 ## After installing — the setup that actually matters
 
-1. **Currency** — Settings → Store details → set store currency to **EUR**.
-   (The store is billed in EUR but the storefront currency is separate.)
-2. **Markets** — Settings → Markets → make **Ireland** the primary market and
-   add the EU countries you ship to.
-3. **Taxes** — Settings → Taxes and duties → Ireland → register for Irish VAT and
-   choose **"All prices include tax"**. Irish VAT on adult clothing is 23%.
-   Children's clothing and footwear for under-11s is zero-rated — tag those
-   products and assign them a 0% override, or you will overcharge and under-remit.
-4. **Shipping** — create rates matching what the theme promises:
+Verified against the live store on 29 Aug 2026. Already correct:
+
+- Domain `dressar.eu`, SSL issued, set as primary
+- Store currency **EUR**
+- **"All prices include tax"** is on — which the theme's "VAT included" note assumes
+- Store address set to Roscommon, Ireland
+
+Still to do:
+
+1. **Timezone** — currently `Africa/Cairo`. Set it to `Europe/Dublin`, or every
+   order timestamp is two hours out and the "dispatched before 1pm" promise on
+   the Delivery page means the wrong thing.
+2. **Markets** — the only market is **Egypt**. Create an Ireland market, make it
+   primary, and add the EU countries you actually ship to.
+3. **Shipping countries** — the store currently ships to 29 countries including
+   the US, Canada, Australia, Japan and Korea. The theme quotes Irish and EU
+   rates only. Narrow the zones, or you will take orders you cannot fulfil at the
+   price shown.
+4. **Taxes** — Irish VAT on adult clothing is 23%. Children's clothing and
+   footwear for under-11s is zero-rated: tag those products and apply a 0%
+   override, or you will overcharge customers and under-remit to Revenue.
+   `taxShipping` is currently off — confirm that with your accountant, since
+   delivery normally follows the VAT treatment of the goods.
+5. **Shipping rates** — create rates matching what the theme promises:
    Ireland €5.95 (free over €75) · Northern Ireland €7.95 · EU €12.95 (free over €150).
    If you change these, update them in **Theme settings → Ireland & EU** *and* in
    the Delivery page copy — the theme does not read your shipping rates.
-5. **Navigation** — build a `main-menu` and `footer` menu. The header expects
+6. **Navigation** — build a `main-menu` and `footer` menu. The header expects
    one level of dropdown.
-6. **Pages** — Content → Pages, create these and paste from `content/pages/`:
+7. **Pages** — Content → Pages, create these and paste from `content/pages/`:
    | Page | Handle | Template |
    |---|---|---|
    | Delivery & Returns | `delivery` | default |
    | Size Guide | `size-guide` | default |
    | About | `about` | default |
    | Contact | `contact` | `page.contact` |
-7. **Policies** — Settings → Policies, paste from `content/policies/`.
+8. **Policies** — Settings → Policies, paste from `content/policies/`.
    **These are drafts with `[PLACEHOLDER]` fields — fill them in and have a
    solicitor review them before you open.**
-8. **Theme settings** — Customize → set logo, free-delivery threshold, delivery
+9. **Theme settings** — Customize → set logo, free-delivery threshold, delivery
    times, returns window, and pick the collections for the homepage blocks.
 
 ## Ireland-specific behaviour built into the theme
@@ -102,9 +118,9 @@ rings and a skip link.
 
 ## Notes and limitations
 
-- Product data is **not** bundled. The theme renders whatever is in the store;
-  the new store is currently empty, so import the catalogue (or a subset priced
-  in EUR) before publishing.
+- Product data is **not** bundled. The theme renders whatever is in the store,
+  and the store currently has **0 products and 1 collection** — import a
+  curated, EUR-priced assortment before publishing.
 - Prices must be **set in EUR in Shopify**, not converted at render time. Don't
   FX-convert the EGP prices mechanically — EU retail pricing is a commercial
   decision (duty, VAT, shipping, local positioning).
