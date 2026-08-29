@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" dir="{% if request.locale.iso_code == 'ar' %}rtl{% else %}ltr{% endif %}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="{{ settings.color_bg }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &ndash; {{ 'general.meta.tags' | t: tags: current_tags | join: ', ' }}{% endif -%}
+      {%- if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    {% render 'meta-tags' %}
+
+    {{ content_for_header }}
+
+    {%- liquid
+      assign body_font = settings.body_font
+      assign heading_font = settings.heading_font
+      assign body_bold = body_font | font_modify: 'weight', '600'
+      assign body_italic = body_font | font_modify: 'style', 'italic'
+      assign heading_bold = heading_font | font_modify: 'weight', '700'
+    -%}
+
+    {{ body_font | font_face: font_display: 'swap' }}
+    {{ body_bold | font_face: font_display: 'swap' }}
+    {{ body_italic | font_face: font_display: 'swap' }}
+    {{ heading_font | font_face: font_display: 'swap' }}
+    {{ heading_bold | font_face: font_display: 'swap' }}
+
+    <style>
+      :root {
+        --bg: {{ settings.color_bg }};
+        --surface: {{ settings.color_surface }};
+        --ink: {{ settings.color_ink }};
+        --muted: {{ settings.color_muted }};
+        --line: {{ settings.color_line }};
+        --accent: {{ settings.color_accent }};
+        --accent-soft: {{ settings.color_accent_soft }};
+        --sale: {{ settings.color_sale }};
+
+        --font-body: {{ body_font.family }}, {{ body_font.fallback_families }};
+        --font-heading: {{ heading_font.family }}, {{ heading_font.fallback_families }};
+        --body-weight: {{ body_font.weight }};
+        --heading-weight: {{ heading_font.weight }};
+        --heading-scale: {{ settings.heading_scale | divided_by: 100.0 }};
+      }
+    </style>
+
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+
+    <script>
+      window.Dressar = {
+        routes: {
+          cart_add_url: '{{ routes.cart_add_url }}',
+          cart_change_url: '{{ routes.cart_change_url }}',
+          cart_update_url: '{{ routes.cart_update_url }}',
+          cart_url: '{{ routes.cart_url }}',
+          predictive_search_url: '{{ routes.predictive_search_url }}'
+        },
+        strings: {
+          addToCart: {{ 'products.product.add_to_cart' | t | json }},
+          soldOut: {{ 'products.product.sold_out' | t | json }},
+          unavailable: {{ 'products.product.unavailable' | t | json }},
+          cartEmpty: {{ 'cart.general.empty' | t | json }},
+          freeShippingProgress: {{ 'cart.general.free_shipping_progress' | t: amount: '[amount]' | json }},
+          freeShippingReached: {{ 'cart.general.free_shipping_reached' | t | json }}
+        },
+        moneyFormat: {{ shop.money_format | json }},
+        freeShippingThreshold: {{ settings.free_shipping_threshold | times: 100 | default: 0 | json }},
+        cookieBanner: {{ settings.enable_cookie_banner | json }}
+      };
+    </script>
+
+    <script src="{{ 'theme.js' | asset_url }}" defer></script>
+    <script src="{{ 'cart.js' | asset_url }}" defer></script>
+    {%- if settings.enable_cookie_banner -%}
+      <script src="{{ 'consent.js' | asset_url }}" defer></script>
+    {%- endif -%}
+  </head>
+
+  <body class="template-{{ template.name | handle }}{% if template.suffix %} template-suffix-{{ template.suffix | handle }}{% endif %}">
+    <a class="skip-link" href="#MainContent">{{ 'general.accessibility.skip_to_content' | t }}</a>
+
+    {% section 'announcement-bar' %}
+    {% section 'header' %}
+
+    <main id="MainContent" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% section 'footer' %}
+
+    {% render 'cart-drawer' %}
+
+    <div class="overlay" data-overlay hidden></div>
+  </body>
+</html>

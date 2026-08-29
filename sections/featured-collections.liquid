@@ -1,0 +1,79 @@
+<section class="section">
+  <div class="wrap">
+    <div class="section-head{% if section.settings.center %} section-head--center{% endif %}">
+      <div>
+        {%- if section.settings.eyebrow != blank -%}<p class="eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
+        <h2>{{ section.settings.heading }}</h2>
+        {%- if section.settings.text != blank -%}<p>{{ section.settings.text }}</p>{%- endif -%}
+      </div>
+      {%- if section.settings.link_label != blank -%}
+        <a class="link-underline" href="{{ section.settings.link_url }}">{{ section.settings.link_label }}</a>
+      {%- endif -%}
+    </div>
+
+    <div class="grid grid--{{ section.settings.columns }}">
+      {%- for block in section.blocks -%}
+        {%- assign coll = block.settings.collection -%}
+        {%- if coll != blank -%}
+          <a class="coll-card" href="{{ coll.url }}" {{ block.shopify_attributes }}>
+            <div class="coll-card__media">
+              {%- assign img = block.settings.image | default: coll.featured_image -%}
+              {%- if img -%}
+                <img
+                  src="{{ img | image_url: width: 800 }}"
+                  srcset="{{ img | image_url: width: 400 }} 400w, {{ img | image_url: width: 800 }} 800w"
+                  sizes="(min-width: 750px) 33vw, 50vw"
+                  alt="{{ img.alt | default: coll.title | escape }}"
+                  width="800" height="1066" loading="lazy">
+              {%- else -%}
+                {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </div>
+            <span class="coll-card__label">
+              <span class="coll-card__name">{{ block.settings.title | default: coll.title }}</span>
+              {%- if section.settings.show_count -%}
+                <span class="coll-card__count">{{ 'collections.general.products_count' | t: count: coll.all_products_count }}</span>
+              {%- endif -%}
+            </span>
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection grid",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by category" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "text", "id": "link_label", "label": "Link label" },
+    { "type": "url", "id": "link_url", "label": "Link URL" },
+    {
+      "type": "select", "id": "columns", "label": "Columns", "default": "3",
+      "options": [{ "value": "3", "label": "Three" }, { "value": "4", "label": "Four" }]
+    },
+    { "type": "checkbox", "id": "center", "label": "Centre heading", "default": false },
+    { "type": "checkbox", "id": "show_count", "label": "Show product count", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "text", "id": "title", "label": "Override title" },
+        { "type": "image_picker", "id": "image", "label": "Override image" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection grid",
+      "blocks": [{ "type": "collection" }, { "type": "collection" }, { "type": "collection" }]
+    }
+  ]
+}
+{% endschema %}

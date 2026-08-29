@@ -1,0 +1,206 @@
+{%- liquid
+  assign v = product.selected_or_first_available_variant
+  assign threshold = settings.free_shipping_threshold | times: 100
+-%}
+
+<div class="wrap section">
+  <nav class="eyebrow" aria-label="{{ 'general.breadcrumbs.label' | t }}" style="margin-bottom:24px">
+    <a href="{{ routes.root_url }}" style="text-decoration:none">{{ 'general.breadcrumbs.home' | t }}</a>
+    {%- if collection %} / <a href="{{ collection.url }}" style="text-decoration:none">{{ collection.title }}</a>{% endif -%}
+  </nav>
+
+  <div class="product">
+    <div class="product__gallery">
+      {%- for media in product.media limit: 8 -%}
+        <figure>
+          <img
+            src="{{ media | image_url: width: 1200 }}"
+            srcset="{{ media | image_url: width: 600 }} 600w, {{ media | image_url: width: 1200 }} 1200w, {{ media | image_url: width: 1600 }} 1600w"
+            sizes="(min-width: 900px) 55vw, 100vw"
+            alt="{{ media.alt | default: product.title | escape }}"
+            width="{{ media.width }}"
+            height="{{ media.height }}"
+            {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>
+        </figure>
+      {%- else -%}
+        <figure>{{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}</figure>
+      {%- endfor -%}
+    </div>
+
+    <div class="product__info">
+      {%- if settings.card_show_vendor and product.vendor != blank -%}
+        <p class="eyebrow">{{ product.vendor }}</p>
+      {%- endif -%}
+
+      <h1 class="product__title">{{ product.title }}</h1>
+
+      <div class="product__price" data-product-price>
+        {%- if v.compare_at_price > v.price -%}
+          <span class="price__sale">{{ v.price | money }}</span>
+          <s class="price__compare">{{ v.compare_at_price | money }}</s>
+        {%- else -%}
+          <span>{{ v.price | money }}</span>
+        {%- endif -%}
+      </div>
+
+      <p class="product__tax-note">
+        {%- if settings.show_vat_note -%}{{ 'products.product.vat_included' | t }} &middot; {% endif -%}
+        {{ 'products.product.shipping_note' | t }}
+      </p>
+
+      {%- form 'product', product, id: 'ProductForm', data-product-form: '', data-variants: 'VariantData' -%}
+        <input type="hidden" name="id" value="{{ v.id }}">
+
+        {%- unless product.has_only_default_variant -%}
+          {%- for option in product.options_with_values -%}
+            <div class="variant-group">
+              <div class="variant-group__label">
+                <span>{{ option.name }}</span>
+                <span class="selected">{{ option.selected_value }}</span>
+              </div>
+              <div class="variant-options">
+                {%- for value in option.values -%}
+                  {%- assign input_id = 'opt-' | append: forloop.parentloop.index | append: '-' | append: forloop.index -%}
+                  <span class="variant-option">
+                    <input
+                      type="radio"
+                      id="{{ input_id }}"
+                      name="option{{ forloop.parentloop.index }}"
+                      value="{{ value | escape }}"
+                      {% if option.selected_value == value %}checked{% endif %}>
+                    <label for="{{ input_id }}">{{ value }}</label>
+                  </span>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endunless -%}
+
+        {%- if section.settings.size_guide_page != blank -%}
+          <p style="margin-bottom:20px">
+            <a class="link-underline" href="{{ section.settings.size_guide_page.url }}">{{ 'products.product.size_guide' | t }}</a>
+          </p>
+        {%- endif -%}
+
+        <p
+          class="product__stock"
+          data-product-stock
+          data-low-template="{{ 'products.product.low_stock' | t: count: '[count]' }}"
+          {% unless v.available and v.inventory_management and v.inventory_quantity > 0 and v.inventory_quantity <= 5 %}hidden{% endunless %}>
+          {{ 'products.product.low_stock' | t: count: v.inventory_quantity }}
+        </p>
+
+        <div class="product__buy">
+          <div class="qty">
+            <button type="button" data-qty="down" aria-label="Decrease quantity">&minus;</button>
+            <input type="number" name="quantity" value="1" min="1" aria-label="{{ 'products.product.quantity' | t }}">
+            <button type="button" data-qty="up" aria-label="Increase quantity">+</button>
+          </div>
+
+          <button type="submit" class="btn btn--full" data-add-button {% unless v.available %}disabled{% endunless %}>
+            {%- if v.available -%}{{ 'products.product.add_to_cart' | t }}{%- else -%}{{ 'products.product.sold_out' | t }}{%- endif -%}
+          </button>
+
+          <p class="form-status form-status--error" data-form-error hidden></p>
+        </div>
+      {%- endform -%}
+
+      {%- if threshold > 0 -%}
+        <p class="muted" style="font-size:var(--step--1);margin-bottom:24px">
+          {% render 'icon', icon: 'truck' %}
+          Free delivery on Irish orders over {{ threshold | money_without_trailing_zeros }} &middot; {{ settings.delivery_time_ie }}
+        </p>
+      {%- endif -%}
+
+      <div class="accordion">
+        {%- if product.description != blank -%}
+          <div class="accordion__item">
+            <h2 style="margin:0">
+              <button type="button" class="accordion__trigger" aria-expanded="true" aria-controls="AccDesc">
+                <span>Details</span><span class="plus" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div class="accordion__panel rte" id="AccDesc">{{ product.description }}</div>
+          </div>
+        {%- endif -%}
+
+        {%- for block in section.blocks -%}
+          <div class="accordion__item" {{ block.shopify_attributes }}>
+            <h2 style="margin:0">
+              <button type="button" class="accordion__trigger" aria-expanded="false" aria-controls="Acc-{{ block.id }}">
+                <span>{{ block.settings.heading }}</span><span class="plus" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div class="accordion__panel rte" id="Acc-{{ block.id }}" hidden>{{ block.settings.content }}</div>
+          </div>
+        {%- endfor -%}
+
+        {%- if v.sku != blank -%}
+          <p class="muted" style="font-size:var(--step--1);padding-top:16px">
+            {{ 'products.product.sku' | t }}: <span data-product-sku>{{ v.sku }}</span>
+          </p>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="VariantData">
+  [
+    {%- for variant in product.variants -%}
+      {
+        "id": {{ variant.id }},
+        "options": {{ variant.options | json }},
+        "price": {{ variant.price }},
+        "compare_at_price": {{ variant.compare_at_price | default: 0 }},
+        "available": {{ variant.available | json }},
+        "sku": {{ variant.sku | json }},
+        "inventory_management": {{ variant.inventory_management | json }},
+        "inventory_quantity": {{ variant.inventory_quantity | default: 0 }}
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+</script>
+
+{%- if section.settings.related_collection != blank or product.collections.size > 0 -%}
+  {%- assign source = section.settings.related_collection | default: product.collections.first -%}
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head section-head--center">
+        <div><h2>You may also like</h2></div>
+      </div>
+      <div class="grid grid--4">
+        {%- assign shown = 0 -%}
+        {%- for related in source.products -%}
+          {%- if related.id != product.id and shown < 4 -%}
+            {% render 'product-card', card_product: related %}
+            {%- assign shown = shown | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product",
+  "settings": [
+    { "type": "page", "id": "size_guide_page", "label": "Size guide page" },
+    { "type": "collection", "id": "related_collection", "label": "Related products collection", "info": "Leave empty to use the product's first collection." }
+  ],
+  "blocks": [
+    {
+      "type": "accordion",
+      "name": "Accordion row",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Delivery & returns" },
+        {
+          "type": "richtext", "id": "content", "label": "Content",
+          "default": "<p>Free delivery on Irish orders over €75, otherwise €5.95. Delivered in 2–4 working days by An Post or DPD. You have 14 days to cancel under EU law and 30 days to return with us.</p>"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

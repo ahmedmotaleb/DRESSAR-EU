@@ -1,0 +1,48 @@
+<div class="wrap section">
+  <div style="max-width:420px;margin-inline:auto">
+    <h1 class="center">{{ 'customer.login.title' | t }}</h1>
+
+    <div id="RecoverPassword" style="display:none">
+      {%- form 'recover_customer_password' -%}
+        <div class="stack">
+          {%- if form.posted_successfully? -%}
+            <p class="form-status form-status--success">{{ 'customer.recover.success' | t }}</p>
+          {%- endif -%}
+          <div class="field">
+            <label for="RecoverEmail">{{ 'customer.login.email' | t }}</label>
+            <input type="email" id="RecoverEmail" name="email" autocomplete="email" required>
+          </div>
+          <button type="submit" class="btn btn--full">{{ 'customer.recover.submit' | t }}</button>
+          <p class="center"><a class="link-underline" href="#" onclick="document.getElementById('RecoverPassword').style.display='none';document.getElementById('LoginForm').style.display='block';return false">{{ 'customer.recover.cancel' | t }}</a></p>
+        </div>
+      {%- endform -%}
+    </div>
+
+    <div id="LoginForm">
+      {%- form 'customer_login' -%}
+        <div class="stack">
+          {%- if form.errors -%}
+            <p class="form-status form-status--error">{{ form.errors | default_errors }}</p>
+          {%- endif -%}
+          <div class="field">
+            <label for="LoginEmail">{{ 'customer.login.email' | t }}</label>
+            <input type="email" id="LoginEmail" name="customer[email]" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="LoginPassword">{{ 'customer.login.password' | t }}</label>
+            <input type="password" id="LoginPassword" name="customer[password]" autocomplete="current-password" required>
+          </div>
+          <button type="submit" class="btn btn--full">{{ 'customer.login.submit' | t }}</button>
+          <p class="center">
+            <a class="link-underline" href="#" onclick="document.getElementById('LoginForm').style.display='none';document.getElementById('RecoverPassword').style.display='block';return false">{{ 'customer.login.forgot' | t }}</a>
+          </p>
+          <p class="center"><a class="link-underline" href="{{ routes.account_register_url }}">{{ 'customer.login.create' | t }}</a></p>
+        </div>
+      {%- endform -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{ "name": "Login" }
+{% endschema %}

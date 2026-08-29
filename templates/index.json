@@ -1,0 +1,117 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "eyebrow": "Now delivering to Ireland",
+        "heading": "Modest wear, made to be worn.",
+        "text": "Abayas, skirts, blouses and dresses cut for real life — designed in our Cairo studio, delivered across Ireland in 2–4 working days.",
+        "cta_label": "Shop new arrivals",
+        "cta2_label": "Best sellers",
+        "height": "lg",
+        "alignment": "start",
+        "text_light": true,
+        "overlay_opacity": 28
+      }
+    },
+    "usp": {
+      "type": "usp-bar",
+      "blocks": {
+        "b1": { "type": "item", "settings": { "icon": "truck", "title": "Free delivery over €75", "text": "Ireland, 2–4 working days" } },
+        "b2": { "type": "item", "settings": { "icon": "return", "title": "30-day returns", "text": "Beyond your 14-day EU right" } },
+        "b3": { "type": "item", "settings": { "icon": "lock", "title": "Secure checkout", "text": "Card, Apple Pay, Google Pay" } },
+        "b4": { "type": "item", "settings": { "icon": "chat", "title": "Here to help", "text": "Mon–Fri, 9am–5pm IST" } }
+      },
+      "block_order": ["b1", "b2", "b3", "b4"]
+    },
+    "categories": {
+      "type": "featured-collections",
+      "settings": {
+        "eyebrow": "The edit",
+        "heading": "Shop by category",
+        "columns": "3",
+        "show_count": true,
+        "center": false
+      },
+      "blocks": {
+        "c1": { "type": "collection", "settings": { "title": "Abayas & Cardigans" } },
+        "c2": { "type": "collection", "settings": { "title": "Skirts" } },
+        "c3": { "type": "collection", "settings": { "title": "Dresses" } },
+        "c4": { "type": "collection", "settings": { "title": "Shirts & Blouses" } },
+        "c5": { "type": "collection", "settings": { "title": "Coats & Jackets" } },
+        "c6": { "type": "collection", "settings": { "title": "Complete Looks" } }
+      },
+      "block_order": ["c1", "c2", "c3", "c4", "c5", "c6"]
+    },
+    "new_in": {
+      "type": "featured-products",
+      "settings": {
+        "eyebrow": "Just landed",
+        "heading": "New this week",
+        "count": 8
+      }
+    },
+    "story": {
+      "type": "image-with-text",
+      "settings": {
+        "eyebrow": "Why Dressar",
+        "heading": "Designed in Cairo. Stocked in the EU.",
+        "text": "<p>Every Dressar piece starts as a sketch in our Cairo studio and is made in small runs, so fabric and fit get the attention they deserve.</p><p>We hold stock inside the EU, so your order ships within the single market — duties are already handled and nothing extra is owed at the door.</p>",
+        "cta_label": "Our story",
+        "flip": false
+      }
+    },
+    "best": {
+      "type": "featured-products",
+      "settings": {
+        "eyebrow": "Loved by our customers",
+        "heading": "Best sellers",
+        "count": 8
+      }
+    },
+    "faq": {
+      "type": "faq",
+      "settings": { "eyebrow": "Good to know", "heading": "Questions, answered" },
+      "blocks": {
+        "q1": {
+          "type": "question",
+          "settings": {
+            "question": "How long does delivery take in Ireland?",
+            "answer": "<p>Orders placed before 1pm are dispatched the same working day. Delivery is 2–4 working days nationwide with An Post or DPD, including the islands. You'll get a tracking link as soon as your parcel leaves us.</p>"
+          }
+        },
+        "q2": {
+          "type": "question",
+          "settings": {
+            "question": "How much is delivery?",
+            "answer": "<p>Standard delivery within Ireland is €5.95, and free on orders over €75. Rest of the EU is €12.95, free over €150.</p>"
+          }
+        },
+        "q3": {
+          "type": "question",
+          "settings": {
+            "question": "Will I pay customs or import duty?",
+            "answer": "<p>No. We ship to Irish and EU customers from stock held inside the EU, so your order moves within the single market. The price you see includes Irish VAT and there is nothing further to pay on delivery.</p>"
+          }
+        },
+        "q4": {
+          "type": "question",
+          "settings": {
+            "question": "Can I return something?",
+            "answer": "<p>Yes. Under EU law you have 14 days from delivery to cancel your order for any reason. We extend that to 30 days as a goodwill policy. Items should be unworn with tags attached. See our <a href=\"/pages/delivery\">Delivery &amp; Returns</a> page.</p>"
+          }
+        },
+        "q5": {
+          "type": "question",
+          "settings": {
+            "question": "What size should I order?",
+            "answer": "<p>Our sizes run to the EU scale and most of our pieces are designed with a relaxed, non-clinging fit. Each product page lists garment measurements — and our <a href=\"/pages/size-guide\">size guide</a> converts between EU, UK and our own S–XXL labels.</p>"
+          }
+        }
+      },
+      "block_order": ["q1", "q2", "q3", "q4", "q5"]
+    },
+    "newsletter": { "type": "newsletter" }
+  },
+  "order": ["hero", "usp", "categories", "new_in", "story", "best", "faq", "newsletter"]
+}

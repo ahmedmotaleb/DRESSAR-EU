@@ -1,0 +1,32 @@
+<div class="wrap section">
+  <div class="collection-head">
+    <h1>{{ 'general.search.search' | t }}</h1>
+    <form action="{{ routes.search_url }}" method="get" role="search" style="max-width:520px;margin-inline:auto;display:flex;gap:10px">
+      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ 'general.search.placeholder' | t }}" aria-label="{{ 'general.search.search' | t }}">
+      <input type="hidden" name="type" value="product">
+      <button type="submit" class="btn">{{ 'general.search.search' | t }}</button>
+    </form>
+  </div>
+
+  {%- if search.performed -%}
+    {%- if search.results_count > 0 -%}
+      <p class="toolbar__count" style="margin-bottom:24px">{{ 'general.search.results_with_count' | t: count: search.results_count }}</p>
+      {%- paginate search.results by 24 -%}
+        <div class="grid grid--4">
+          {%- for item in search.results -%}
+            {%- if item.object_type == 'product' -%}
+              {% render 'product-card', card_product: item %}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+        {% render 'pagination', paginate: paginate %}
+      {%- endpaginate -%}
+    {%- else -%}
+      <p class="center">{{ 'general.search.no_results' | t: terms: search.terms }}</p>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{ "name": "Search" }
+{% endschema %}

@@ -1,0 +1,19 @@
+{%- liquid
+  assign target = price_target
+  assign compare = target.compare_at_price
+  assign current = target.price
+  if target.price_varies and show_from
+    assign show_from_label = true
+  endif
+-%}
+<span class="price">
+  {%- if show_from_label -%}
+    <span class="price__from">{{ 'products.product.from_price' | t }}</span>
+  {%- endif -%}
+  {%- if compare > current -%}
+    <span class="price__sale">{{ current | money }}</span>
+    <s class="price__compare">{{ compare | money }}</s>
+  {%- else -%}
+    <span>{{ current | money }}</span>
+  {%- endif -%}
+</span>

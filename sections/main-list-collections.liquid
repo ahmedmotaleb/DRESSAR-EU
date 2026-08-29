@@ -1,0 +1,32 @@
+<div class="wrap">
+  <div class="collection-head">
+    <h1>{{ page_title }}</h1>
+  </div>
+
+  <div class="grid grid--3" style="padding-bottom:var(--gutter)">
+    {%- for coll in collections -%}
+      <a class="coll-card" href="{{ coll.url }}">
+        <div class="coll-card__media">
+          {%- if coll.featured_image -%}
+            <img
+              src="{{ coll.featured_image | image_url: width: 800 }}"
+              srcset="{{ coll.featured_image | image_url: width: 400 }} 400w, {{ coll.featured_image | image_url: width: 800 }} 800w"
+              sizes="(min-width: 750px) 33vw, 50vw"
+              alt="{{ coll.featured_image.alt | default: coll.title | escape }}"
+              width="800" height="1066" loading="lazy">
+          {%- else -%}
+            {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+        </div>
+        <span class="coll-card__label">
+          <span class="coll-card__name">{{ coll.title }}</span>
+          <span class="coll-card__count">{{ 'collections.general.products_count' | t: count: coll.all_products_count }}</span>
+        </span>
+      </a>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{ "name": "Collections list" }
+{% endschema %}

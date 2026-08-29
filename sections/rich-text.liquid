@@ -1,0 +1,28 @@
+<section class="section{% if section.settings.tint %} newsletter{% endif %}">
+  <div class="wrap wrap--narrow center">
+    {%- if section.settings.eyebrow != blank -%}<p class="eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
+    {%- if section.settings.heading != blank -%}<h2>{{ section.settings.heading }}</h2>{%- endif -%}
+    <div class="rte">{{ section.settings.text }}</div>
+    {%- if section.settings.cta_label != blank -%}
+      <p style="margin-top:28px"><a class="btn" href="{{ section.settings.cta_link }}">{{ section.settings.cta_label }}</a></p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Rich text",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Modest doesn't mean plain" },
+    {
+      "type": "richtext", "id": "text", "label": "Text",
+      "default": "<p>We cut for full coverage without the shapelessness — considered lengths, opaque fabrics, and sleeves that stay where you put them.</p>"
+    },
+    { "type": "text", "id": "cta_label", "label": "Button label" },
+    { "type": "url", "id": "cta_link", "label": "Button link" },
+    { "type": "checkbox", "id": "tint", "label": "Tinted background", "default": false }
+  ],
+  "presets": [{ "name": "Rich text" }]
+}
+{% endschema %}

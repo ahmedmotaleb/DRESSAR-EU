@@ -1,0 +1,95 @@
+{
+  "general": {
+    "meta": { "tags": "Tagged \"{{ tags }}\"", "page": "Page {{ page }}" },
+    "search": {
+      "search": "Search",
+      "placeholder": "Search abayas, skirts, blouses…",
+      "results_with_count": { "one": "{{ count }} result", "other": "{{ count }} results" },
+      "no_results": "No results for “{{ terms }}”.",
+      "reset": "Clear search"
+    },
+    "pagination": { "previous": "Previous", "next": "Next", "label": "Pagination" },
+    "share": { "copied": "Link copied" },
+    "breadcrumbs": { "home": "Home", "label": "Breadcrumbs" },
+    "accessibility": {
+      "skip_to_content": "Skip to content",
+      "close": "Close",
+      "menu": "Menu",
+      "next_slide": "Next",
+      "previous_slide": "Previous"
+    },
+    "newsletter": {
+      "heading": "Join the Dressar list",
+      "body": "New arrivals, restocks and private sales — to your inbox, never more than weekly.",
+      "placeholder": "Email address",
+      "submit": "Subscribe",
+      "success": "Thank you — please confirm via the email we just sent.",
+      "consent": "By subscribing you agree to our Privacy Policy. Unsubscribe any time."
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to bag",
+      "sold_out": "Sold out",
+      "unavailable": "Unavailable",
+      "on_sale": "Sale",
+      "low_stock": "Only {{ count }} left",
+      "quantity": "Quantity",
+      "sku": "SKU",
+      "vendor": "Brand",
+      "view_details": "View details",
+      "choose_options": "Choose options",
+      "size_guide": "Size guide",
+      "from_price": "From",
+      "pre_order": "Pre-order",
+      "notify_me": "Email me when back in stock",
+      "colours_count": { "one": "{{ count }} colour", "other": "{{ count }} colours" },
+      "vat_included": "VAT included",
+      "shipping_note": "Delivery calculated at checkout"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Your bag",
+      "empty": "Your bag is empty.",
+      "continue_shopping": "Continue shopping",
+      "subtotal": "Subtotal",
+      "checkout": "Checkout",
+      "remove": "Remove",
+      "item_count": { "one": "{{ count }} item", "other": "{{ count }} items" },
+      "note": "Order notes",
+      "taxes_and_shipping": "Taxes included. Delivery calculated at checkout.",
+      "free_shipping_progress": "You are {{ amount }} away from free delivery.",
+      "free_shipping_reached": "You have earned free delivery.",
+      "view_bag": "View bag"
+    }
+  },
+  "collections": {
+    "general": {
+      "no_matches": "No products match these filters.",
+      "products_count": { "one": "{{ count }} product", "other": "{{ count }} products" },
+      "filter": "Filter",
+      "sort_by": "Sort by",
+      "clear_all": "Clear all",
+      "apply": "Apply"
+    }
+  },
+  "customer": {
+    "account": { "title": "My account", "details": "Account details", "orders": "Order history", "log_out": "Log out" },
+    "login": { "title": "Log in", "email": "Email", "password": "Password", "submit": "Log in", "forgot": "Forgot your password?", "create": "Create an account" },
+    "register": { "title": "Create an account", "first_name": "First name", "last_name": "Last name", "submit": "Create" },
+    "recover": { "title": "Reset password", "submit": "Send reset link", "success": "We have emailed you a reset link.", "cancel": "Back to log in" },
+    "orders": { "order_number": "Order", "date": "Date", "payment_status": "Payment", "fulfillment_status": "Delivery", "total": "Total", "none": "You have not placed any orders yet." },
+    "addresses": { "title": "Addresses", "add": "Add address", "edit": "Edit", "delete": "Delete", "default": "Default address" }
+  },
+  "blogs": { "article": { "read_more": "Read more", "back": "Back to journal", "posted_on": "Posted on" } },
+  "sections": {
+    "footer": { "payment_methods": "Payment methods", "country": "Country/region", "language": "Language" }
+  },
+  "404": { "title": "Page not found", "body": "The page you were looking for does not exist or has moved.", "cta": "Back to shop" },
+  "shopify": {
+    "online_store_editor": {
+      "sections": { "header": "Header", "footer": "Footer" }
+    }
+  }
+}

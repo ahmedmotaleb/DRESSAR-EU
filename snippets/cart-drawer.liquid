@@ -1,0 +1,42 @@
+<aside class="cart-drawer" data-panel data-cart-drawer id="CartDrawer" role="dialog" aria-modal="true" aria-label="{{ 'cart.general.title' | t }}" data-open="false">
+  <div class="cart-drawer__head">
+    <h2>{{ 'cart.general.title' | t }}</h2>
+    <button type="button" class="icon-btn" data-close-panel aria-label="{{ 'general.accessibility.close' | t }}">
+      {% render 'icon', icon: 'close' %}
+    </button>
+  </div>
+
+  <div class="cart-drawer__body" data-cart-items>
+    <div class="cart-empty">
+      <p>{{ 'cart.general.empty' | t }}</p>
+      <a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">{{ 'cart.general.continue_shopping' | t }}</a>
+    </div>
+  </div>
+
+  <div class="cart-drawer__foot" data-cart-foot hidden>
+    <div class="cart-total">
+      <span>{{ 'cart.general.subtotal' | t }}</span>
+      <strong data-cart-total>{{ cart.total_price | money }}</strong>
+    </div>
+    <p class="cart-note">{{ 'cart.general.taxes_and_shipping' | t }}</p>
+    <form action="{{ routes.cart_url }}" method="post">
+      <button type="submit" name="checkout" class="btn btn--full">{{ 'cart.general.checkout' | t }}</button>
+    </form>
+    <a class="btn btn--ghost btn--full" href="{{ routes.cart_url }}">{{ 'cart.general.view_bag' | t }}</a>
+  </div>
+</aside>
+
+{%- if settings.enable_cookie_banner -%}
+  <div class="cookie" data-cookie-banner role="dialog" aria-label="Cookie preferences" hidden>
+    <h2>We use cookies</h2>
+    <p>
+      We use cookies to run this shop, remember your bag and understand what our customers like.
+      You can accept or decline non-essential cookies. Read our
+      <a href="/policies/privacy-policy">Privacy Policy</a>.
+    </p>
+    <div class="cookie__actions">
+      <button type="button" class="btn btn--sm" data-consent-accept>Accept all</button>
+      <button type="button" class="btn btn--sm btn--outline" data-consent-decline>Essential only</button>
+    </div>
+  </div>
+{%- endif -%}

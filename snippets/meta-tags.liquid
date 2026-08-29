@@ -1,0 +1,76 @@
+{%- liquid
+  assign og_title = page_title
+  assign og_url = canonical_url
+  assign og_type = 'website'
+  assign og_description = page_description | default: shop.description | default: shop.name
+
+  if request.page_type == 'product'
+    assign og_type = 'product'
+  elsif request.page_type == 'article'
+    assign og_type = 'article'
+  endif
+-%}
+<meta property="og:site_name" content="{{ shop.name }}">
+<meta property="og:url" content="{{ og_url }}">
+<meta property="og:title" content="{{ og_title | escape }}">
+<meta property="og:type" content="{{ og_type }}">
+<meta property="og:description" content="{{ og_description | escape }}">
+<meta property="og:locale" content="{{ request.locale.iso_code }}">
+
+{%- if request.page_type == 'product' and product.featured_media -%}
+  <meta property="og:image" content="http:{{ product.featured_media | image_url: width: 1200 }}">
+  <meta property="og:image:secure_url" content="https:{{ product.featured_media | image_url: width: 1200 }}">
+  <meta property="product:price:amount" content="{{ product.price | divided_by: 100.0 }}">
+  <meta property="product:price:currency" content="{{ cart.currency.iso_code }}">
+{%- elsif settings.share_image -%}
+  <meta property="og:image" content="http:{{ settings.share_image | image_url: width: 1200 }}">
+  <meta property="og:image:secure_url" content="https:{{ settings.share_image | image_url: width: 1200 }}">
+{%- endif -%}
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og_title | escape }}">
+<meta name="twitter:description" content="{{ og_description | escape }}">
+
+{%- if request.page_type == 'product' -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": {{ product.title | json }},
+      "description": {{ product.description | strip_html | truncate: 300 | json }},
+      "image": [{{ product.featured_media | image_url: width: 1200 | prepend: 'https:' | json }}],
+      "sku": {{ product.selected_or_first_available_variant.sku | json }},
+      "brand": { "@type": "Brand", "name": {{ product.vendor | default: shop.name | json }} },
+      "offers": {
+        "@type": "Offer",
+        "url": {{ request.origin | append: product.url | json }},
+        "priceCurrency": {{ cart.currency.iso_code | json }},
+        "price": {{ product.selected_or_first_available_variant.price | divided_by: 100.0 | json }},
+        "availability": "https://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
+        "itemCondition": "https://schema.org/NewCondition",
+        "eligibleRegion": { "@type": "Country", "name": "Ireland" },
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "IE",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": {{ settings.returns_window | default: 30 | json }},
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/ReturnShippingFees"
+        }
+      }
+    }
+  </script>
+{%- endif -%}
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    "url": {{ request.origin | json }},
+    "areaServed": { "@type": "Country", "name": "Ireland" }
+    {%- if settings.logo %},
+    "logo": {{ settings.logo | image_url: width: 400 | prepend: 'https:' | json }}
+    {%- endif -%}
+  }
+</script>

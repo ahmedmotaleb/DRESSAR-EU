@@ -1,0 +1,51 @@
+<div class="wrap">
+  <div class="collection-head">
+    <h1>{{ collection.title }}</h1>
+    {%- if collection.description != blank -%}
+      <div class="rte">{{ collection.description }}</div>
+    {%- endif -%}
+  </div>
+</div>
+
+<div class="wrap">
+  {%- paginate collection.products by section.settings.per_page -%}
+    <form class="toolbar" id="FacetForm" method="get">
+      {%- if collection.current_type or collection.current_vendor -%}
+        <input type="hidden" name="q" value="{{ collection.current_vendor | default: collection.current_type }}">
+      {%- endif -%}
+
+      <span class="toolbar__count">{{ 'collections.general.products_count' | t: count: collection.products_count }}</span>
+
+      <div class="toolbar__controls">
+        <label class="visually-hidden" for="SortBy">{{ 'collections.general.sort_by' | t }}</label>
+        <select id="SortBy" name="sort_by" data-auto-submit>
+          {%- assign current_sort = collection.sort_by | default: collection.default_sort_by -%}
+          {%- for option in collection.sort_options -%}
+            <option value="{{ option.value }}" {% if option.value == current_sort %}selected{% endif %}>{{ option.name }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+    </form>
+
+    {%- if collection.products.size > 0 -%}
+      <div class="grid grid--4">
+        {%- for product in collection.products -%}
+          {% render 'product-card', card_product: product %}
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <p class="center section">{{ 'collections.general.no_matches' | t }}</p>
+    {%- endif -%}
+
+    {% render 'pagination', paginate: paginate %}
+  {%- endpaginate -%}
+</div>
+
+{% schema %}
+{
+  "name": "Collection",
+  "settings": [
+    { "type": "range", "id": "per_page", "min": 12, "max": 48, "step": 4, "label": "Products per page", "default": 24 }
+  ]
+}
+{% endschema %}

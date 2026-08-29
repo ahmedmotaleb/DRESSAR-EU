@@ -1,0 +1,32 @@
+{
+  "current": {
+    "wordmark": "DRESSAR",
+    "wordmark_suffix": "IRELAND",
+    "logo_width": 150,
+    "color_bg": "#FBF8F4",
+    "color_surface": "#FFFFFF",
+    "color_ink": "#211E1A",
+    "color_muted": "#6E655A",
+    "color_line": "#E7DFD4",
+    "color_accent": "#41543F",
+    "color_accent_soft": "#EDF1EB",
+    "color_sale": "#A4453A",
+    "heading_font": "playfair_display_n4",
+    "body_font": "work_sans_n4",
+    "heading_scale": 100,
+    "free_shipping_threshold": "75",
+    "delivery_time_ie": "2–4 working days",
+    "delivery_time_eu": "4–8 working days",
+    "returns_window": "30",
+    "show_vat_note": true,
+    "enable_cookie_banner": true,
+    "card_image_ratio": "tall",
+    "card_show_second_image": true,
+    "card_show_vendor": false,
+    "card_show_swatches": true,
+    "sections": {
+      "header": { "type": "header" },
+      "footer": { "type": "footer" }
+    }
+  }
+}

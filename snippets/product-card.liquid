@@ -1,0 +1,76 @@
+{%- liquid
+  assign p = card_product
+  assign ratio = settings.card_image_ratio | default: 'tall'
+  assign alt_image = p.media[1]
+  assign colour_option = null
+  for opt in p.options_with_values
+    assign dn = opt.name | downcase
+    if dn contains 'colour' or dn contains 'color' or dn contains 'لون'
+      assign colour_option = opt
+    endif
+  endfor
+-%}
+
+<div class="card">
+  <a class="card__media card__media--{{ ratio }}" href="{{ p.url }}" tabindex="-1" aria-hidden="true">
+    {%- if p.featured_media -%}
+      <img
+        class="card__img--main"
+        src="{{ p.featured_media | image_url: width: 700 }}"
+        srcset="{{ p.featured_media | image_url: width: 350 }} 350w, {{ p.featured_media | image_url: width: 700 }} 700w, {{ p.featured_media | image_url: width: 1000 }} 1000w"
+        sizes="(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw"
+        alt="{{ p.featured_media.alt | default: p.title | escape }}"
+        width="{{ p.featured_media.width }}"
+        height="{{ p.featured_media.height }}"
+        loading="lazy">
+      {%- if settings.card_show_second_image and alt_image -%}
+        <img
+          class="card__img--alt"
+          src="{{ alt_image | image_url: width: 700 }}"
+          srcset="{{ alt_image | image_url: width: 350 }} 350w, {{ alt_image | image_url: width: 700 }} 700w"
+          sizes="(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw"
+          alt=""
+          width="{{ alt_image.width }}"
+          height="{{ alt_image.height }}"
+          loading="lazy">
+      {%- endif -%}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+    {%- endif -%}
+
+    <div class="card__badges">
+      {%- if p.available == false -%}
+        <span class="badge badge--soldout">{{ 'products.product.sold_out' | t }}</span>
+      {%- elsif p.compare_at_price > p.price -%}
+        <span class="badge badge--sale">{{ 'products.product.on_sale' | t }}</span>
+      {%- elsif p.tags contains 'New Arrivals' or p.tags contains 'New arrivals' -%}
+        <span class="badge badge--new">New</span>
+      {%- endif -%}
+    </div>
+  </a>
+
+  {%- if p.available and p.variants.size == 1 -%}
+    <div class="card__quickadd">
+      <form action="{{ routes.cart_add_url }}" method="post">
+        <input type="hidden" name="id" value="{{ p.selected_or_first_available_variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="btn btn--sm btn--full">{{ 'products.product.add_to_cart' | t }}</button>
+      </form>
+    </div>
+  {%- elsif p.available -%}
+    <div class="card__quickadd">
+      <a class="btn btn--sm btn--full" href="{{ p.url }}">{{ 'products.product.choose_options' | t }}</a>
+    </div>
+  {%- endif -%}
+
+  <div class="card__body">
+    {%- if settings.card_show_vendor and p.vendor != blank -%}
+      <span class="card__vendor">{{ p.vendor }}</span>
+    {%- endif -%}
+    <h3 class="card__title"><a href="{{ p.url }}">{{ p.title }}</a></h3>
+    {%- render 'price', price_target: p, show_from: true -%}
+    {%- if settings.card_show_swatches and colour_option and colour_option.values.size > 1 -%}
+      <span class="card__meta">{{ 'products.product.colours_count' | t: count: colour_option.values.size }}</span>
+    {%- endif -%}
+  </div>
+</div>

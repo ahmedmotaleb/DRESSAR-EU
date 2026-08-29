@@ -1,0 +1,173 @@
+{
+  "general": {
+    "search": {
+      "search": "بحث",
+      "placeholder": "ابحثي عن عبايات، جيبات، بلوزات…",
+      "results_with_count": {
+        "zero": "لا نتائج",
+        "one": "نتيجة واحدة",
+        "two": "نتيجتان",
+        "few": "{{ count }} نتائج",
+        "many": "{{ count }} نتيجة",
+        "other": "{{ count }} نتيجة"
+      },
+      "no_results": "لا توجد نتائج لـ «{{ terms }}».",
+      "reset": "مسح البحث"
+    },
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي",
+      "label": "ترقيم الصفحات"
+    },
+    "breadcrumbs": {
+      "home": "الرئيسية",
+      "label": "مسار التنقل"
+    },
+    "accessibility": {
+      "skip_to_content": "تخطي إلى المحتوى",
+      "close": "إغلاق",
+      "menu": "القائمة",
+      "next_slide": "التالي",
+      "previous_slide": "السابق"
+    },
+    "newsletter": {
+      "heading": "انضمي إلى قائمة دريسار",
+      "body": "وصل حديثًا وتخفيضات خاصة — إلى بريدك، مرة أسبوعيًا على الأكثر.",
+      "placeholder": "البريد الإلكتروني",
+      "submit": "اشتراك",
+      "success": "شكرًا لك — يرجى التأكيد عبر البريد الذي أرسلناه.",
+      "consent": "بالاشتراك أنت توافقين على سياسة الخصوصية. يمكنك إلغاء الاشتراك في أي وقت."
+    },
+    "meta": {
+      "tags": "موسوم بـ «{{ tags }}»",
+      "page": "صفحة {{ page }}"
+    },
+    "share": {
+      "copied": "تم نسخ الرابط"
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "أضيفي إلى الحقيبة",
+      "sold_out": "نفدت الكمية",
+      "unavailable": "غير متاح",
+      "on_sale": "تخفيض",
+      "low_stock": "بقي {{ count }} فقط",
+      "quantity": "الكمية",
+      "sku": "رمز المنتج",
+      "vendor": "الماركة",
+      "view_details": "عرض التفاصيل",
+      "choose_options": "اختاري المقاس",
+      "size_guide": "دليل المقاسات",
+      "from_price": "يبدأ من",
+      "pre_order": "طلب مسبق",
+      "notify_me": "أعلميني عند التوفر",
+      "colours_count": {
+        "one": "لون واحد",
+        "two": "لونان",
+        "few": "{{ count }} ألوان",
+        "other": "{{ count }} لون"
+      },
+      "vat_included": "شامل ضريبة القيمة المضافة",
+      "shipping_note": "تُحسب رسوم التوصيل عند الدفع"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "حقيبتك",
+      "empty": "حقيبتك فارغة.",
+      "continue_shopping": "متابعة التسوق",
+      "subtotal": "المجموع الفرعي",
+      "checkout": "إتمام الشراء",
+      "remove": "إزالة",
+      "item_count": {
+        "one": "قطعة واحدة",
+        "two": "قطعتان",
+        "few": "{{ count }} قطع",
+        "other": "{{ count }} قطعة"
+      },
+      "note": "ملاحظات الطلب",
+      "taxes_and_shipping": "الأسعار شاملة الضريبة. تُحسب رسوم التوصيل عند الدفع.",
+      "free_shipping_progress": "تبقى {{ amount }} للحصول على توصيل مجاني.",
+      "free_shipping_reached": "حصلت على توصيل مجاني.",
+      "view_bag": "عرض الحقيبة"
+    }
+  },
+  "collections": {
+    "general": {
+      "no_matches": "لا توجد منتجات مطابقة.",
+      "products_count": {
+        "one": "منتج واحد",
+        "two": "منتجان",
+        "few": "{{ count }} منتجات",
+        "other": "{{ count }} منتج"
+      },
+      "filter": "تصفية",
+      "sort_by": "ترتيب حسب",
+      "clear_all": "مسح الكل",
+      "apply": "تطبيق"
+    }
+  },
+  "404": {
+    "title": "الصفحة غير موجودة",
+    "body": "الصفحة التي تبحثين عنها غير موجودة أو تم نقلها.",
+    "cta": "العودة للتسوق"
+  },
+  "customer": {
+    "account": {
+      "title": "حسابي",
+      "details": "بيانات الحساب",
+      "orders": "سجل الطلبات",
+      "log_out": "تسجيل الخروج"
+    },
+    "login": {
+      "title": "تسجيل الدخول",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "submit": "تسجيل الدخول",
+      "forgot": "هل نسيت كلمة المرور؟",
+      "create": "إنشاء حساب"
+    },
+    "register": {
+      "title": "إنشاء حساب",
+      "first_name": "الاسم الأول",
+      "last_name": "اسم العائلة",
+      "submit": "إنشاء"
+    },
+    "recover": {
+      "title": "إعادة تعيين كلمة المرور",
+      "submit": "إرسال رابط إعادة التعيين",
+      "success": "أرسلنا إليك رابط إعادة تعيين كلمة المرور.",
+      "cancel": "العودة لتسجيل الدخول"
+    },
+    "orders": {
+      "order_number": "الطلب",
+      "date": "التاريخ",
+      "payment_status": "حالة الدفع",
+      "fulfillment_status": "حالة التوصيل",
+      "total": "الإجمالي",
+      "none": "لم تقومي بأي طلب بعد."
+    },
+    "addresses": {
+      "title": "العناوين",
+      "add": "إضافة عنوان",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "default": "العنوان الافتراضي"
+    }
+  },
+  "blogs": {
+    "article": {
+      "read_more": "اقرئي المزيد",
+      "back": "العودة إلى المدونة",
+      "posted_on": "نُشر في"
+    }
+  },
+  "sections": {
+    "footer": {
+      "payment_methods": "طرق الدفع",
+      "country": "الدولة/المنطقة",
+      "language": "اللغة"
+    }
+  }
+}

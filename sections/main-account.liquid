@@ -1,0 +1,42 @@
+<div class="wrap section">
+  <div class="section-head">
+    <div><h1>{{ 'customer.account.title' | t }}</h1><p>{{ customer.email }}</p></div>
+    <a class="link-underline" href="{{ routes.account_logout_url }}">{{ 'customer.account.log_out' | t }}</a>
+  </div>
+
+  <h2>{{ 'customer.account.orders' | t }}</h2>
+  {%- if customer.orders.size > 0 -%}
+    <div class="table-scroll">
+      <table class="rte" style="width:100%">
+        <thead>
+          <tr>
+            <th>{{ 'customer.orders.order_number' | t }}</th>
+            <th>{{ 'customer.orders.date' | t }}</th>
+            <th>{{ 'customer.orders.payment_status' | t }}</th>
+            <th>{{ 'customer.orders.fulfillment_status' | t }}</th>
+            <th>{{ 'customer.orders.total' | t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {%- for order in customer.orders -%}
+            <tr>
+              <td><a href="{{ order.customer_url }}">{{ order.name }}</a></td>
+              <td>{{ order.created_at | date: '%-d %b %Y' }}</td>
+              <td>{{ order.financial_status_label }}</td>
+              <td>{{ order.fulfillment_status_label }}</td>
+              <td>{{ order.total_price | money }}</td>
+            </tr>
+          {%- endfor -%}
+        </tbody>
+      </table>
+    </div>
+  {%- else -%}
+    <p class="muted">{{ 'customer.orders.none' | t }}</p>
+  {%- endif -%}
+
+  <p style="margin-top:32px"><a class="link-underline" href="{{ routes.account_addresses_url }}">{{ 'customer.addresses.title' | t }}</a></p>
+</div>
+
+{% schema %}
+{ "name": "Account" }
+{% endschema %}

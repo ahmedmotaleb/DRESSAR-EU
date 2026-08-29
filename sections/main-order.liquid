@@ -1,0 +1,44 @@
+<div class="wrap section">
+  <h1>{{ order.name }}</h1>
+  <p class="muted">{{ order.created_at | date: '%-d %B %Y' }} &middot; {{ order.financial_status_label }} &middot; {{ order.fulfillment_status_label }}</p>
+
+  <div class="table-scroll" style="margin-top:28px">
+    <table class="rte" style="width:100%">
+      <thead>
+        <tr><th>Item</th><th>Qty</th><th>Total</th></tr>
+      </thead>
+      <tbody>
+        {%- for line in order.line_items -%}
+          <tr>
+            <td>{{ line.title }}</td>
+            <td>{{ line.quantity }}</td>
+            <td>{{ line.final_line_price | money }}</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+      <tfoot>
+        <tr><td colspan="2">Subtotal</td><td>{{ order.line_items_subtotal_price | money }}</td></tr>
+        {%- for s in order.shipping_methods -%}
+          <tr><td colspan="2">Delivery ({{ s.title }})</td><td>{{ s.price | money }}</td></tr>
+        {%- endfor -%}
+        {%- for t in order.tax_lines -%}
+          <tr><td colspan="2">{{ t.title }} ({{ t.rate_percentage }}%)</td><td>{{ t.price | money }}</td></tr>
+        {%- endfor -%}
+        <tr><td colspan="2"><strong>Total</strong></td><td><strong>{{ order.total_price | money }}</strong></td></tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="grid" style="margin-top:36px;grid-template-columns:1fr;gap:24px">
+    <div>
+      <h2>Delivery address</h2>
+      <p class="muted">{{ order.shipping_address | format_address }}</p>
+    </div>
+  </div>
+
+  <p style="margin-top:32px"><a class="link-underline" href="{{ routes.account_url }}">Back to account</a></p>
+</div>
+
+{% schema %}
+{ "name": "Order" }
+{% endschema %}

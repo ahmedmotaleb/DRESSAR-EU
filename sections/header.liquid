@@ -1,0 +1,120 @@
+<header class="header">
+  <div class="header__inner">
+    <button
+      type="button"
+      class="icon-btn header__menu-toggle"
+      data-open-panel="#MobileNav"
+      aria-label="{{ 'general.accessibility.menu' | t }}"
+      aria-controls="MobileNav">
+      {% render 'icon', icon: 'menu' %}
+    </button>
+
+    <nav class="header__nav" role="navigation" aria-label="Main">
+      <ul class="nav">
+        {%- for link in section.settings.menu.links -%}
+          <li class="nav__item{% if link.active or link.child_active %} nav__item--active{% endif %}">
+            <a class="nav__link" href="{{ link.url }}">{{ link.title }}</a>
+            {%- if link.links.size > 0 -%}
+              <ul class="nav__submenu">
+                {%- for child in link.links -%}
+                  <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+
+    <a class="header__logo" href="{{ routes.root_url }}">
+      {%- if settings.logo -%}
+        <img
+          src="{{ settings.logo | image_url: width: 500 }}"
+          alt="{{ shop.name | escape }}"
+          width="{{ settings.logo.width }}"
+          height="{{ settings.logo.height }}"
+          style="width:{{ settings.logo_width }}px;height:auto">
+      {%- else -%}
+        <span class="header__wordmark">{{ settings.wordmark | default: shop.name }}</span>
+        {%- if settings.wordmark_suffix != blank -%}
+          <span class="header__suffix">{{ settings.wordmark_suffix }}</span>
+        {%- endif -%}
+      {%- endif -%}
+    </a>
+
+    <div class="header__actions">
+      <button type="button" class="icon-btn" data-open-panel="#SearchPanel" aria-label="{{ 'general.search.search' | t }}" aria-controls="SearchPanel">
+        {% render 'icon', icon: 'search' %}
+      </button>
+
+      {%- if shop.customer_accounts_enabled -%}
+        <a class="icon-btn" href="{{ routes.account_url }}" aria-label="{{ 'customer.account.title' | t }}">
+          {% render 'icon', icon: 'user' %}
+        </a>
+      {%- endif -%}
+
+      <button type="button" class="icon-btn" data-open-panel="#CartDrawer" aria-label="{{ 'cart.general.title' | t }}" aria-controls="CartDrawer">
+        {% render 'icon', icon: 'bag' %}
+        <span class="cart-count" data-cart-count data-count="{{ cart.item_count }}">{{ cart.item_count }}</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="search-panel" data-panel id="SearchPanel" role="dialog" aria-modal="true" aria-label="{{ 'general.search.search' | t }}" data-open="false">
+  <form class="search-panel__form" action="{{ routes.search_url }}" method="get" role="search">
+    <input type="search" name="q" placeholder="{{ 'general.search.placeholder' | t }}" aria-label="{{ 'general.search.search' | t }}" autocomplete="off">
+    <input type="hidden" name="type" value="product">
+    <button type="submit" class="btn">{{ 'general.search.search' | t }}</button>
+    <button type="button" class="icon-btn" data-close-panel aria-label="{{ 'general.accessibility.close' | t }}">
+      {% render 'icon', icon: 'close' %}
+    </button>
+  </form>
+</div>
+
+<nav class="mobile-nav" data-panel id="MobileNav" role="dialog" aria-modal="true" aria-label="{{ 'general.accessibility.menu' | t }}" data-open="false">
+  <div class="mobile-nav__head">
+    <span class="header__wordmark">{{ settings.wordmark | default: shop.name }}</span>
+    <button type="button" class="icon-btn" data-close-panel aria-label="{{ 'general.accessibility.close' | t }}">
+      {% render 'icon', icon: 'close' %}
+    </button>
+  </div>
+
+  <ul class="mobile-nav__list">
+    {%- for link in section.settings.menu.links -%}
+      <li>
+        {%- if link.links.size > 0 -%}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+          <button type="button" class="visually-hidden" data-submenu-toggle aria-expanded="true">{{ link.title }}</button>
+          <ul class="mobile-nav__sub">
+            {%- for child in link.links -%}
+              <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+            {%- endfor -%}
+          </ul>
+        {%- else -%}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+
+  <div class="mobile-nav__foot">
+    <p>{{ section.settings.mobile_footer_text }}</p>
+    {% render 'social-links' %}
+  </div>
+</nav>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    { "type": "link_list", "id": "menu", "label": "Menu", "default": "main-menu" },
+    {
+      "type": "text",
+      "id": "mobile_footer_text",
+      "label": "Mobile menu note",
+      "default": "Delivered across Ireland in 2–4 working days."
+    }
+  ]
+}
+{% endschema %}
