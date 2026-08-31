@@ -26,9 +26,6 @@
   border-bottom-color: transparent;
   color: rgb(var(--dh-overlay-fg, 255, 255, 255));
 }
-.dr-overlay-header .dressar-header--overlay:not(.is-solid) .dressar-header__logo-dark { display: none; }
-.dressar-header__logo-light { display: none; }
-.dr-overlay-header .dressar-header--overlay:not(.is-solid) .dressar-header__logo-light { display: block; }
 
 .dressar-header__inner {
   display: grid;
@@ -45,25 +42,45 @@
 }
 .dressar-header--logo-start .dressar-header__inner { grid-template-columns: auto 1fr auto; }
 
-.dressar-header__nav { display: none; min-width: 0; }
-.dressar-header__actions { display: flex; align-items: center; justify-content: flex-end; gap: .2rem; }
-.dressar-header__toggle { justify-self: start; }
+/* Every child is placed explicitly. Left to auto-placement, the menu button
+   takes column 1, the nav lands in column 2 on top of the logo's explicit
+   column 2, and the logo is bumped onto a second row. */
+.dressar-header__nav { display: none; min-width: 0; grid-column: 1; grid-row: 1; }
+.dressar-header__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .2rem;
+  grid-column: 3;
+  grid-row: 1;
+}
+.dressar-header__toggle { grid-column: 1; grid-row: 1; justify-self: start; }
 @media screen and (min-width: 990px) {
   .dressar-header__nav { display: block; }
-  .dressar-header__toggle { display: none; }
+  /* .dressar-icon sets display:inline-flex at equal specificity but later in
+     this file, so a bare class here would lose and the button would never hide. */
+  .dressar-header__inner .dressar-header__toggle { display: none; }
+  /* Only from here up: below this breakpoint column 1 is the menu button's. */
+  .dressar-header--logo-start .dressar-header__logo { grid-column: 1; justify-self: start; }
+  .dressar-header--logo-start .dressar-header__nav { grid-column: 2; }
 }
 
 /* ---- logo ---- */
 .dressar-header__logo {
   grid-column: 2;
+  grid-row: 1;
   justify-self: center;
   display: inline-flex;
   align-items: center;
   text-decoration: none;
   color: inherit;
 }
-.dressar-header--logo-start .dressar-header__logo { grid-column: 1; justify-self: start; }
 .dressar-header__logo img { display: block; height: auto; }
+/* Both marks ship in the markup and exactly one is shown. These have to outrank
+   the rule directly above, which is a class *and* an element. */
+.dressar-header__logo img.dressar-header__logo-light { display: none; }
+.dr-overlay-header .dressar-header--overlay:not(.is-solid) .dressar-header__logo img.dressar-header__logo-dark { display: none; }
+.dr-overlay-header .dressar-header--overlay:not(.is-solid) .dressar-header__logo img.dressar-header__logo-light { display: block; }
 .dressar-header__wordmark {
   font-family: var(--font-heading-family);
   font-weight: var(--font-heading-weight);
