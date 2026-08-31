@@ -130,7 +130,15 @@
       {%- endif -%}
 
       {%- if s.heading != blank -%}
-        <h2 class="dr-hero__title">{{ s.heading }}</h2>
+        {%- comment -%}
+          The hero is normally a page's main heading, so this defaults to H1.
+          It was hard-coded to H2, which left the home page with no H1 at all.
+        {%- endcomment -%}
+        {%- if s.heading_tag == 'h2' -%}
+          <h2 class="dr-hero__title">{{ s.heading }}</h2>
+        {%- else -%}
+          <h1 class="dr-hero__title">{{ s.heading }}</h1>
+        {%- endif -%}
       {%- endif -%}
 
       {%- if s.text != blank -%}
@@ -176,6 +184,11 @@
     { "type": "header", "content": "Content" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "New season" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Modesty, reimagined." },
+    {
+      "type": "select", "id": "heading_tag", "label": "Heading level", "default": "h1",
+      "info": "Keep H1 when this is the page's main heading. Use H2 only if another section on the same page already carries the H1 — a page should have exactly one.",
+      "options": [{ "value": "h1", "label": "H1" }, { "value": "h2", "label": "H2" }]
+    },
     { "type": "textarea", "id": "text", "label": "Text", "default": "Modern silhouettes. Considered proportions. Designed around movement." },
     { "type": "text", "id": "cta_label", "label": "Button label", "default": "Discover the collection" },
     { "type": "url", "id": "cta_link", "label": "Button link" },

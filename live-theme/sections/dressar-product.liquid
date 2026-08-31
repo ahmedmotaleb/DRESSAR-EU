@@ -286,6 +286,52 @@
 </section>
 </product-component>
 
+{%- comment -%}
+  Product structured data. Replacing Dawn's main-product.liquid dropped the JSON-LD
+  it emitted, which costs price and availability in Google's product rich results.
+  Every value is read from the product — nothing is asserted that the store has not
+  actually set.
+{%- endcomment -%}
+{%- liquid
+  assign seo_media = product.featured_media
+  assign seo_variant = product.selected_or_first_available_variant
+-%}
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org/",
+  "@type": "Product",
+  "name": {{ product.title | json }},
+  "url": {{ request.origin | append: product.url | json }},
+  {% if seo_media %}
+    "image": [{{ seo_media | image_url: width: 1920 | prepend: "https:" | json }}],
+  {% endif %}
+  {% if product.description != blank %}
+    "description": {{ product.description | strip_html | json }},
+  {% endif %}
+  {% if seo_variant.sku != blank %}
+    "sku": {{ seo_variant.sku | json }},
+  {% endif %}
+  {% if product.vendor != blank %}
+    "brand": {
+      "@type": "Brand",
+      "name": {{ product.vendor | json }}
+    },
+  {% endif %}
+  "offers": [
+    {% for variant in product.variants %}
+      {
+        "@type": "Offer",
+        {% if variant.sku != blank %}"sku": {{ variant.sku | json }},{% endif %}
+        "availability": "http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+        "price": {{ variant.price | divided_by: 100.00 | json }},
+        "priceCurrency": {{ cart.currency.iso_code | json }},
+        "url": {{ request.origin | append: variant.url | json }}
+      }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ]
+}
+</script>
+
 {%- if s.enable_sticky_bar -%}
   <div class="dr-stickybar" data-dr-sticky>
     <span class="dr-stickybar__title">{{ product.title }}</span>
