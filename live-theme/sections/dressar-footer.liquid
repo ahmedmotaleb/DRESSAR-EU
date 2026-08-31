@@ -1,0 +1,331 @@
+{%- comment -%}
+  Footer. Columns are menu-driven blocks — nothing is hardcoded. The legal column
+  renders only the policies actually published in Shopify, so there are no links
+  to pages that do not exist.
+{%- endcomment -%}
+
+{{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<footer class="dr-footer color-{{ s.color_scheme }} gradient">
+  <div class="dr-wrap">
+    <div class="dr-footer__grid">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+
+          {%- when 'brand' -%}
+            <div class="dr-footer__col dr-footer__col--brand" {{ block.shopify_attributes }}>
+              {%- if block.settings.image -%}
+                <img
+                  class="dr-footer__logo"
+                  src="{{ block.settings.image | image_url: width: 500 }}"
+                  alt="{{ shop.name | escape }}"
+                  width="{{ block.settings.image.width }}"
+                  height="{{ block.settings.image.height }}"
+                  style="width: {{ block.settings.image_width }}px"
+                  loading="lazy"
+                >
+              {%- else -%}
+                <p class="dr-footer__wordmark">{{ shop.name }}</p>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <div class="dr-footer__blurb rte">{{ block.settings.text }}</div>
+              {%- endif -%}
+            </div>
+
+          {%- when 'menu' -%}
+            <nav class="dr-footer__col" {{ block.shopify_attributes }} aria-label="{{ block.settings.heading | escape }}">
+              {%- if block.settings.heading != blank -%}
+                <h2 class="dr-footer__head">{{ block.settings.heading }}</h2>
+              {%- endif -%}
+              <ul class="dr-footer__list" role="list">
+                {%- for link in block.settings.menu.links -%}
+                  <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+                {%- endfor -%}
+              </ul>
+            </nav>
+
+          {%- when 'legal' -%}
+            <nav class="dr-footer__col" {{ block.shopify_attributes }} aria-label="{{ block.settings.heading | escape }}">
+              {%- if block.settings.heading != blank -%}
+                <h2 class="dr-footer__head">{{ block.settings.heading }}</h2>
+              {%- endif -%}
+              <ul class="dr-footer__list" role="list">
+                {%- if shop.privacy_policy != blank -%}
+                  <li><a href="{{ shop.privacy_policy.url }}">{{ shop.privacy_policy.title }}</a></li>
+                {%- endif -%}
+                {%- if shop.terms_of_service != blank -%}
+                  <li><a href="{{ shop.terms_of_service.url }}">{{ shop.terms_of_service.title }}</a></li>
+                {%- endif -%}
+                {%- if shop.shipping_policy != blank -%}
+                  <li><a href="{{ shop.shipping_policy.url }}">{{ shop.shipping_policy.title }}</a></li>
+                {%- endif -%}
+                {%- if shop.refund_policy != blank -%}
+                  <li><a href="{{ shop.refund_policy.url }}">{{ shop.refund_policy.title }}</a></li>
+                {%- endif -%}
+                {%- for link in block.settings.menu.links -%}
+                  <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+                {%- endfor -%}
+                {%- if block.settings.show_consent_link -%}
+                  <li>
+                    <button type="button" class="dr-footer__linkbtn" data-dr-consent-open>
+                      {{ block.settings.consent_label }}
+                    </button>
+                  </li>
+                {%- endif -%}
+              </ul>
+            </nav>
+
+          {%- when 'newsletter' -%}
+            <div class="dr-footer__col dr-footer__col--news" {{ block.shopify_attributes }}>
+              {%- if block.settings.heading != blank -%}
+                <h2 class="dr-footer__head">{{ block.settings.heading }}</h2>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <p class="dr-footer__blurb">{{ block.settings.text }}</p>
+              {%- endif -%}
+
+              {%- form 'customer', class: 'dr-footer__form' -%}
+                <input type="hidden" name="contact[tags]" value="newsletter">
+                {%- if form.posted_successfully? -%}
+                  <p class="dr-footer__ok">{{ 'newsletter.success' | t }}</p>
+                {%- else -%}
+                  <div class="dr-footer__field">
+                    <label class="visually-hidden" for="FooterEmail">{{ 'newsletter.label' | t }}</label>
+                    <input
+                      id="FooterEmail"
+                      type="email"
+                      name="contact[email]"
+                      placeholder="{{ 'newsletter.label' | t }}"
+                      autocomplete="email"
+                      required
+                    >
+                    <button type="submit" aria-label="{{ 'newsletter.button_label' | t }}">
+                      {{- 'icon-arrow.svg' | inline_asset_content -}}
+                    </button>
+                  </div>
+                  {%- if block.settings.consent_text != blank -%}
+                    <p class="dr-footer__consent">{{ block.settings.consent_text }}</p>
+                  {%- endif -%}
+                  {%- if form.errors -%}
+                    <p class="dr-footer__err">{{ form.errors.messages.email }}</p>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endform -%}
+            </div>
+
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+
+    <div class="dr-footer__bottom">
+      <p class="dr-footer__copy">
+        &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}
+        {%- if s.company_details != blank %} &middot; {{ s.company_details }}{% endif -%}
+      </p>
+
+      {%- if s.show_social -%}
+        <ul class="dr-footer__social" role="list">
+          {%- assign networks = 'instagram,facebook,tiktok,pinterest,youtube,twitter' | split: ',' -%}
+          {%- for net in networks -%}
+            {%- assign key = 'social_' | append: net | append: '_link' -%}
+            {%- assign url = settings[key] -%}
+            {%- if url != blank -%}
+              <li>
+                <a href="{{ url }}" target="_blank" rel="noopener" aria-label="{{ net | capitalize }}">
+                  {{- 'icon-' | append: net | append: '.svg' | inline_asset_content -}}
+                </a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if s.show_localization -%}
+        {%- if localization.available_countries.size > 1 or localization.available_languages.size > 1 -%}
+          <div class="dr-footer__locale">
+            {%- form 'localization', class: 'localization-form' -%}
+              {%- if localization.available_countries.size > 1 -%}
+                <h2 class="visually-hidden" id="FooterCountryLabel">{{ 'localization.country_label' | t }}</h2>
+                {%- render 'country-localization', localPosition: 'FooterCountry' -%}
+              {%- endif -%}
+              {%- if localization.available_languages.size > 1 -%}
+                <h2 class="visually-hidden" id="FooterLanguageLabel">{{ 'localization.language_label' | t }}</h2>
+                {%- render 'language-localization', localPosition: 'FooterLanguage' -%}
+              {%- endif -%}
+            {%- endform -%}
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if s.show_payment_icons and shop.enabled_payment_types.size > 0 -%}
+        <ul class="dr-footer__pay" role="list" aria-label="{{ 'sections.footer.payment' | t }}">
+          {%- for type in shop.enabled_payment_types -%}
+            <li>{{ type | payment_type_svg_tag: class: 'dr-footer__payicon' }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+</footer>
+
+{% stylesheet %}
+.dr-footer { border-top: 1px solid rgba(var(--color-foreground), .12); margin-top: 0; }
+.dr-footer__grid {
+  display: grid;
+  gap: 3.2rem;
+  padding-block: 5.6rem 4rem;
+  grid-template-columns: 1fr;
+}
+@media screen and (min-width: 600px) { .dr-footer__grid { grid-template-columns: repeat(2, 1fr); } }
+@media screen and (min-width: 990px) {
+  .dr-footer__grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3.2rem 2.4rem; }
+  .dr-footer__col--brand, .dr-footer__col--news { grid-column: span 1; }
+}
+.dr-footer__wordmark {
+  font-family: var(--font-heading-family);
+  font-size: 1.8rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  margin: 0 0 1.2rem;
+}
+.dr-footer__logo { display: block; height: auto; margin-bottom: 1.2rem; }
+.dr-footer__blurb { font-size: 1.35rem; opacity: .72; line-height: 1.6; margin: 0 0 1.2rem; }
+.dr-footer__head {
+  font-size: 1.2rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin: 0 0 1.6rem;
+  font-family: var(--font-body-family);
+  font-weight: 500;
+}
+.dr-footer__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.dr-footer__list a,
+.dr-footer__linkbtn {
+  font-size: 1.4rem;
+  text-decoration: none;
+  color: inherit;
+  opacity: .78;
+}
+.dr-footer__list a:hover,
+.dr-footer__linkbtn:hover { opacity: 1; text-decoration: underline; text-underline-offset: .3rem; }
+.dr-footer__linkbtn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: start;
+}
+
+.dr-footer__field { display: flex; border-bottom: 1px solid rgba(var(--color-foreground), .35); }
+.dr-footer__field input {
+  flex: 1;
+  min-width: 0;
+  min-height: 4.4rem;
+  padding: .8rem 0;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 1.4rem;
+}
+.dr-footer__field input:focus { outline: none; }
+.dr-footer__field input::placeholder { color: inherit; opacity: .55; }
+.dr-footer__field button {
+  flex: none;
+  width: 4.4rem;
+  min-height: 4.4rem;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+.dr-footer__field button svg { width: 1.6rem; height: 1.6rem; }
+.dr-footer__consent { font-size: 1.15rem; opacity: .6; margin: 1rem 0 0; line-height: 1.5; }
+.dr-footer__ok { font-size: 1.35rem; margin: 0; }
+.dr-footer__err { font-size: 1.25rem; margin: .8rem 0 0; }
+
+.dr-footer__bottom {
+  border-top: 1px solid rgba(var(--color-foreground), .12);
+  padding-block: 2.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.6rem 2.4rem;
+  font-size: 1.25rem;
+  opacity: .82;
+}
+.dr-footer__copy { margin: 0; margin-inline-end: auto; }
+.dr-footer__social { list-style: none; display: flex; gap: .4rem; margin: 0; padding: 0; }
+.dr-footer__social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.4rem;
+  height: 4.4rem;
+  color: inherit;
+}
+.dr-footer__social svg { width: 1.8rem; height: 1.8rem; }
+.dr-footer__pay { list-style: none; display: flex; flex-wrap: wrap; gap: .6rem; margin: 0; padding: 0; align-items: center; }
+.dr-footer__payicon { height: 2.2rem; width: auto; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    { "type": "text", "id": "company_details", "label": "Company and VAT number", "info": "Shown beside the copyright. Expected on EU commercial sites." },
+    { "type": "checkbox", "id": "show_social", "label": "Show social links", "default": true },
+    { "type": "checkbox", "id": "show_localization", "label": "Show country and language selectors", "default": true },
+    { "type": "checkbox", "id": "show_payment_icons", "label": "Show payment icons", "default": true },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-3" }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Brand",
+      "limit": 1,
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Logo" },
+        { "type": "range", "id": "image_width", "min": 60, "max": 260, "step": 10, "unit": "px", "label": "Logo width", "default": 140 },
+        { "type": "richtext", "id": "text", "label": "Text" }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "Menu column",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Shop" },
+        { "type": "link_list", "id": "menu", "label": "Menu" }
+      ]
+    },
+    {
+      "type": "legal",
+      "name": "Legal column",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Your published Shopify policies are listed automatically. Add anything else — Right of Withdrawal, Cookie Policy, Accessibility, Imprint — as a menu." },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Legal" },
+        { "type": "link_list", "id": "menu", "label": "Extra links" },
+        { "type": "checkbox", "id": "show_consent_link", "label": "Show a cookie preferences link", "default": true },
+        { "type": "text", "id": "consent_label", "label": "Cookie preferences label", "default": "Cookie preferences" }
+      ]
+    },
+    {
+      "type": "newsletter",
+      "name": "Newsletter",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "The Dressar letter" },
+        { "type": "text", "id": "text", "label": "Text", "default": "New collections, styling notes and private releases." },
+        { "type": "text", "id": "consent_text", "label": "Consent note", "default": "By subscribing you agree to our Privacy Policy. Unsubscribe any time." }
+      ]
+    }
+  ],
+  "enabled_on": { "groups": ["footer"] }
+}
+{% endschema %}

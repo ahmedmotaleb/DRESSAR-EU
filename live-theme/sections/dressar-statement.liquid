@@ -1,0 +1,75 @@
+{{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section
+  class="dr-section dr-statement color-{{ s.color_scheme }} gradient"
+  style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px;"
+>
+  <div class="dr-wrap">
+    <div class="dr-statement__inner dr-statement__inner--{{ s.width }}">
+      {%- if s.eyebrow != blank -%}
+        <p class="dr-head__eyebrow">{{ s.eyebrow }}</p>
+      {%- endif -%}
+
+      {%- if s.heading != blank -%}
+        <p class="dr-statement__lead">{{ s.heading }}</p>
+      {%- endif -%}
+
+      {%- if s.text != blank -%}
+        <div class="dr-statement__body rte">{{ s.text }}</div>
+      {%- endif -%}
+
+      {%- if s.cta_label != blank -%}
+        <a class="dr-head__cta" href="{{ s.cta_link }}">{{ s.cta_label }}</a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.dr-statement__inner { text-align: center; margin-inline: auto; }
+.dr-statement__inner--narrow { max-width: 72rem; }
+.dr-statement__inner--medium { max-width: 96rem; }
+.dr-statement__inner--wide { max-width: 128rem; }
+.dr-statement__lead {
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: clamp(3.2rem, 2.2rem + 2.6vw, 6rem);
+  line-height: 1.08;
+  letter-spacing: -.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+.dr-statement__body { margin-top: 2rem; font-size: clamp(1.6rem, 1.5rem + .2vw, 1.8rem); opacity: .78; }
+.dr-statement__body > :first-child { margin-top: 0; }
+.dr-statement__body > :last-child { margin-bottom: 0; }
+.dr-statement .dr-head__cta { margin-top: 2.4rem; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Brand statement",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "textarea", "id": "heading", "label": "Statement", "default": "Designed with coverage in mind. Created without compromising style." },
+    { "type": "richtext", "id": "text", "label": "Supporting text", "default": "<p>Opaque fabrics. Considered lengths. Sleeves that stay where you put them.</p>" },
+    { "type": "text", "id": "cta_label", "label": "Link label" },
+    { "type": "url", "id": "cta_link", "label": "Link" },
+    {
+      "type": "select", "id": "width", "label": "Text width", "default": "medium",
+      "options": [
+        { "value": "narrow", "label": "Narrow" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "wide", "label": "Wide" }
+      ]
+    },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-2" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 160, "step": 8, "unit": "px", "label": "Top padding", "default": 96 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 160, "step": 8, "unit": "px", "label": "Bottom padding", "default": 96 }
+  ],
+  "presets": [{ "name": "Brand statement" }]
+}
+{% endschema %}

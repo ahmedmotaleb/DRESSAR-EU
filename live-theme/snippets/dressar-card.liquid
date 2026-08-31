@@ -1,0 +1,116 @@
+{%- comment -%}
+  Product card. Image-led, no card chrome.
+
+  Accepts:
+    - card_product: product
+    - ratio:        portrait | tall | square   (default tall)
+    - show_second:  boolean
+    - meta_source:  none | type | fabric
+    - index:        forloop index, for image priority
+{%- endcomment -%}
+
+{%- liquid
+  assign p = card_product
+  assign r = ratio | default: 'tall'
+  assign second = p.media[1]
+
+  assign colour_option = null
+  for opt in p.options_with_values
+    assign dn = opt.name | downcase
+    if dn contains 'colour' or dn contains 'color'
+      assign colour_option = opt
+    endif
+  endfor
+
+  assign meta = ''
+  if meta_source == 'type' and p.type != blank
+    assign meta = p.type
+  elsif meta_source == 'fabric'
+    assign meta = p.metafields.custom.fabric.value
+  endif
+
+  assign v = p.selected_or_first_available_variant
+  assign low_stock = false
+  if v.available and v.inventory_management != blank and v.inventory_quantity > 0 and v.inventory_quantity <= 3
+    assign low_stock = true
+  endif
+-%}
+
+<div class="dr-card">
+  <a class="dr-card__media dr-card__media--{{ r }}" href="{{ p.url }}" tabindex="-1" aria-hidden="true">
+    {%- if p.featured_media -%}
+      <img
+        class="dr-card__img--main"
+        src="{{ p.featured_media | image_url: width: 800 }}"
+        srcset="{{ p.featured_media | image_url: width: 400 }} 400w, {{ p.featured_media | image_url: width: 800 }} 800w, {{ p.featured_media | image_url: width: 1200 }} 1200w"
+        sizes="(min-width: 990px) 22vw, (min-width: 750px) 33vw, 50vw"
+        alt="{{ p.featured_media.alt | default: p.title | escape }}"
+        width="{{ p.featured_media.width }}"
+        height="{{ p.featured_media.height }}"
+        {% if index and index <= 4 %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
+      >
+      {%- if show_second and second -%}
+        <img
+          class="dr-card__img--alt"
+          src="{{ second | image_url: width: 800 }}"
+          srcset="{{ second | image_url: width: 400 }} 400w, {{ second | image_url: width: 800 }} 800w"
+          sizes="(min-width: 990px) 22vw, (min-width: 750px) 33vw, 50vw"
+          alt=""
+          width="{{ second.width }}"
+          height="{{ second.height }}"
+          loading="lazy"
+        >
+      {%- endif -%}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'dr-card__img--main' }}
+    {%- endif -%}
+  </a>
+
+  <div class="dr-card__body">
+    {%- if p.available == false -%}
+      <p class="dr-card__status">{{ 'products.product.sold_out' | t }}</p>
+    {%- elsif low_stock -%}
+      <p class="dr-card__status">
+        {{ 'products.product.inventory_low_stock_show_count' | t: quantity: v.inventory_quantity }}
+      </p>
+    {%- endif -%}
+
+    {%- if meta != blank -%}
+      <p class="dr-card__meta">{{ meta }}</p>
+    {%- endif -%}
+
+    <h3 class="dr-card__title"><a href="{{ p.url }}">{{ p.title }}</a></h3>
+
+    <p class="dr-card__price">
+      {%- if p.compare_at_price > p.price -%}
+        <span>{{ p.price | money }}</span>
+        <s>{{ p.compare_at_price | money }}</s>
+      {%- elsif p.price_varies -%}
+        {%- assign from_price = p.price | money -%}
+        <span>{{ 'products.product.price.from_price_html' | t: price: from_price }}</span>
+      {%- else -%}
+        <span>{{ p.price | money }}</span>
+      {%- endif -%}
+    </p>
+
+    {%- if colour_option and colour_option.values.size > 1 -%}
+      <p class="dr-card__colours">+ {{ colour_option.values.size }} {{ colour_option.name | downcase }}</p>
+    {%- endif -%}
+
+    {%- assign tag_list = '' -%}
+    {%- if p.tags contains 'Bestseller' or p.tags contains 'Best sellers' -%}
+      {%- assign tag_list = tag_list | append: 'Bestseller,' -%}
+    {%- endif -%}
+    {%- if p.tags contains 'Exclusive' -%}
+      {%- assign tag_list = tag_list | append: 'Exclusive,' -%}
+    {%- endif -%}
+    {%- if tag_list != blank -%}
+      <div class="dr-card__tags">
+        {%- assign tags = tag_list | split: ',' -%}
+        {%- for t in tags -%}
+          <span class="dr-tag">{{ t }}</span>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>

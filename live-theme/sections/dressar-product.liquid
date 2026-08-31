@@ -1,0 +1,357 @@
+{%- comment -%}
+  Product page. Gallery 60 / information 40 on desktop, information sticky.
+  Add-to-cart submission is handled by Dawn's <product-form> element so the
+  existing cart drawer, error handling and analytics keep working.
+{%- endcomment -%}
+
+{{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+{{ 'dressar-product.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'dressar-product.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign s = section.settings
+  assign v = product.selected_or_first_available_variant
+  assign form_id = 'DressarProductForm-' | append: section.id
+-%}
+
+<product-component
+  view-event-payload="{{ product | standard_event_data: 'view' | escape }}"
+  data-product-id="{{ product.id }}"
+>
+<section
+  class="dr-section color-{{ s.color_scheme }} gradient"
+  style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px;"
+  data-dr-product
+  data-money-format="{{ shop.money_format | escape }}"
+>
+  <div class="dr-wrap">
+    {%- if s.show_breadcrumb -%}
+      <nav class="dr-pdp__crumb" aria-label="Breadcrumbs">
+        <a href="{{ routes.root_url }}">{{ shop.name }}</a>
+        <span aria-hidden="true">/</span>
+        {%- if collection -%}
+          <a href="{{ collection.url }}">{{ collection.title }}</a>
+          <span aria-hidden="true">/</span>
+        {%- endif -%}
+        <span>{{ product.title }}</span>
+      </nav>
+    {%- endif -%}
+
+    <div class="dr-pdp">
+      <div class="dr-pdp__gallery dr-pdp__gallery--{{ s.gallery_layout }}" aria-label="{{ 'products.product.media.gallery_viewer' | t }}">
+        {%- for media in product.media -%}
+          <figure class="dr-pdp__figure" data-media-id="{{ media.id }}">
+            {%- if media.media_type == 'image' -%}
+              <img
+                src="{{ media | image_url: width: 1400 }}"
+                srcset="{{ media | image_url: width: 600 }} 600w, {{ media | image_url: width: 1000 }} 1000w, {{ media | image_url: width: 1400 }} 1400w"
+                sizes="(min-width: 990px) 55vw, 100vw"
+                alt="{{ media.alt | default: product.title | escape }}"
+                width="{{ media.width }}"
+                height="{{ media.height }}"
+                {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
+              >
+            {%- else -%}
+              {{ media | media_tag: image_size: '1400x', autoplay: false, loop: false, controls: true }}
+            {%- endif -%}
+          </figure>
+        {%- else -%}
+          <figure class="dr-pdp__figure">{{ 'product-1' | placeholder_svg_tag: '' }}</figure>
+        {%- endfor -%}
+      </div>
+
+      <div class="dr-pdp__info">
+        {%- if s.eyebrow_source == 'collection' and product.collections.first -%}
+          <p class="dr-pdp__eyebrow">{{ product.collections.first.title }}</p>
+        {%- elsif s.eyebrow_source == 'type' and product.type != blank -%}
+          <p class="dr-pdp__eyebrow">{{ product.type }}</p>
+        {%- endif -%}
+
+        <h1 class="dr-pdp__title">{{ product.title }}</h1>
+
+        {%- assign subtitle = product.metafields.custom.subtitle.value -%}
+        {%- if subtitle != blank -%}
+          <p class="dr-pdp__subtitle">{{ subtitle }}</p>
+        {%- endif -%}
+
+        <div class="dr-pdp__price" data-dr-price>
+          {%- if v.compare_at_price > v.price -%}
+            <span class="dr-pdp__price-now">{{ v.price | money }}</span>
+            <s class="dr-pdp__price-was">{{ v.compare_at_price | money }}</s>
+          {%- else -%}
+            <span class="dr-pdp__price-now">{{ v.price | money }}</span>
+          {%- endif -%}
+        </div>
+
+        <p class="dr-pdp__tax">
+          {%- if cart.taxes_included -%}{{ 'products.product.taxes_included' | t }} {% endif -%}
+          {%- if shop.shipping_policy.body != blank -%}
+            {{ 'products.product.shipping_policy_html' | t: link: shop.shipping_policy.url }}
+          {%- endif -%}
+        </p>
+
+        {%- form 'product',
+          product,
+          id: form_id,
+          class: 'dr-pdp__form',
+          novalidate: 'novalidate',
+          data-type: 'add-to-cart-form'
+        -%}
+          <input type="hidden" name="id" value="{{ v.id }}" data-dr-variant-id>
+
+          {%- unless product.has_only_default_variant -%}
+            {%- for option in product.options_with_values -%}
+              {%- liquid
+                assign is_size = false
+                assign lower = option.name | downcase
+                if lower contains 'size'
+                  assign is_size = true
+                endif
+              -%}
+              <fieldset
+                class="dr-opt"
+                data-dr-option-group
+                data-option-name="{{ option.name | escape }}"
+              >
+                <legend class="dr-opt__legend">
+                  <span>{{ option.name }}</span>
+                  <span class="dr-opt__value" data-dr-option-value>{{ option.selected_value }}</span>
+                  {%- if is_size and s.size_guide_page != blank -%}
+                    <a class="dr-opt__guide" href="{{ s.size_guide_page.url }}">{{ s.size_guide_label }}</a>
+                  {%- endif -%}
+                </legend>
+
+                <div class="dr-opt__choices">
+                  {%- for value in option.values -%}
+                    {%- assign input_id = 'opt-' | append: section.id | append: '-' | append: forloop.parentloop.index | append: '-' | append: forloop.index -%}
+                    <span class="dr-opt__choice">
+                      <input
+                        type="radio"
+                        id="{{ input_id }}"
+                        name="option{{ forloop.parentloop.index }}"
+                        value="{{ value | escape }}"
+                        {% if option.selected_value == value and s.preselect %}checked{% endif %}
+                      >
+                      <label for="{{ input_id }}">{{ value }}</label>
+                    </span>
+                  {%- endfor -%}
+                </div>
+              </fieldset>
+            {%- endfor -%}
+          {%- endunless -%}
+
+          <p
+            class="dr-pdp__stock"
+            data-dr-stock
+            data-template="{{ 'products.product.inventory_low_stock_show_count' | t: quantity: '[count]' }}"
+            {% unless v.available and v.inventory_management != blank and v.inventory_quantity > 0 and v.inventory_quantity <= 3 %}hidden{% endunless %}
+          >
+            {{ 'products.product.inventory_low_stock_show_count' | t: quantity: v.inventory_quantity }}
+          </p>
+
+          <p
+            class="dr-pdp__error"
+            data-dr-size-error
+            data-template="{{ s.validation_message | escape }}"
+            role="alert"
+            hidden
+          ></p>
+
+          <div class="dr-pdp__buy" data-dr-sticky-anchor>
+            <product-form class="product-form" data-hide-errors="false" data-section-id="{{ section.id }}">
+              <div class="product-form__error-message-wrapper" role="alert" hidden>
+                <span class="product-form__error-message"></span>
+              </div>
+
+              <button
+                id="ProductSubmitButton-{{ section.id }}"
+                type="submit"
+                name="add"
+                class="dr-btn dr-btn--solid dr-btn--full product-form__submit"
+                data-dr-submit
+                data-text-add="{{ 'products.product.add_to_cart' | t | escape }}"
+                data-text-soldout="{{ 'products.product.sold_out' | t | escape }}"
+                data-text-unavailable="{{ 'products.product.unavailable' | t | escape }}"
+                {% unless v.available %}disabled{% endunless %}
+              >
+                <span>
+                  {%- if v.available -%}
+                    {{ 'products.product.add_to_cart' | t }}
+                  {%- else -%}
+                    {{ 'products.product.sold_out' | t }}
+                  {%- endif -%}
+                </span>
+              </button>
+            </product-form>
+
+            {%- if s.show_dynamic_checkout -%}
+              {{ form | payment_button }}
+            {%- endif -%}
+          </div>
+        {%- endform -%}
+
+        {%- if s.delivery_note != blank -%}
+          <p class="dr-pdp__delivery">{{ s.delivery_note }}</p>
+        {%- endif -%}
+
+        <div class="dr-acc">
+          {%- if product.description != blank -%}
+            <details class="dr-acc__item" open>
+              <summary class="dr-acc__head">
+                <span>{{ 'products.product.description' | t }}</span>
+                <span class="dr-acc__sign" aria-hidden="true"></span>
+              </summary>
+              <div class="dr-acc__body rte">{{ product.description }}</div>
+            </details>
+          {%- endif -%}
+
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+              {%- when 'metafield_row' -%}
+                {%- assign val = product.metafields.custom[block.settings.key].value -%}
+                {%- if val != blank -%}
+                  <details class="dr-acc__item" {{ block.shopify_attributes }}>
+                    <summary class="dr-acc__head">
+                      <span>{{ block.settings.heading }}</span>
+                      <span class="dr-acc__sign" aria-hidden="true"></span>
+                    </summary>
+                    <div class="dr-acc__body rte">{{ val }}</div>
+                  </details>
+                {%- endif -%}
+              {%- when 'text_row' -%}
+                {%- if block.settings.content != blank -%}
+                  <details class="dr-acc__item" {{ block.shopify_attributes }}>
+                    <summary class="dr-acc__head">
+                      <span>{{ block.settings.heading }}</span>
+                      <span class="dr-acc__sign" aria-hidden="true"></span>
+                    </summary>
+                    <div class="dr-acc__body rte">{{ block.settings.content }}</div>
+                  </details>
+                {%- endif -%}
+              {%- when 'page_row' -%}
+                {%- if block.settings.page != blank -%}
+                  <details class="dr-acc__item" {{ block.shopify_attributes }}>
+                    <summary class="dr-acc__head">
+                      <span>{{ block.settings.heading }}</span>
+                      <span class="dr-acc__sign" aria-hidden="true"></span>
+                    </summary>
+                    <div class="dr-acc__body rte">{{ block.settings.page.content }}</div>
+                  </details>
+                {%- endif -%}
+              {%- when 'eu_info' -%}
+                {% render 'dressar-eu-info', product: product, heading: block.settings.heading, block: block %}
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+
+        {%- if v.sku != blank -%}
+          <p class="dr-pdp__sku">
+            {{ 'products.product.sku' | t }}: <span data-dr-sku>{{ v.sku }}</span>
+          </p>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  <script type="application/json" data-dr-variants>
+    [
+      {%- for variant in product.variants -%}
+        {
+          "id": {{ variant.id }},
+          "options": {{ variant.options | json }},
+          "price": {{ variant.price }},
+          "compare_at_price": {{ variant.compare_at_price | default: 0 }},
+          "available": {{ variant.available | json }},
+          "sku": {{ variant.sku | json }},
+          "inventory_management": {{ variant.inventory_management | json }},
+          "inventory_quantity": {{ variant.inventory_quantity | default: 0 }},
+          "featured_media_id": {{ variant.featured_media.id | default: 0 }}
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ]
+  </script>
+</section>
+</product-component>
+
+{%- if s.enable_sticky_bar -%}
+  <div class="dr-stickybar" data-dr-sticky>
+    <span class="dr-stickybar__title">{{ product.title }}</span>
+    <span class="dr-stickybar__price">{{ v.price | money }}</span>
+    <a class="dr-btn dr-btn--solid" href="#ProductSubmitButton-{{ section.id }}">
+      <span>{{ 'products.product.add_to_cart' | t }}</span>
+    </a>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product",
+  "class": "section",
+  "settings": [
+    { "type": "checkbox", "id": "show_breadcrumb", "label": "Show breadcrumb", "default": true },
+    {
+      "type": "select", "id": "eyebrow_source", "label": "Line above the title", "default": "collection",
+      "options": [
+        { "value": "none", "label": "Nothing" },
+        { "value": "collection", "label": "First collection" },
+        { "value": "type", "label": "Product type" }
+      ]
+    },
+    {
+      "type": "select", "id": "gallery_layout", "label": "Gallery", "default": "grid",
+      "options": [
+        { "value": "grid", "label": "Editorial grid" },
+        { "value": "stack", "label": "Single column" }
+      ]
+    },
+    { "type": "header", "content": "Buying" },
+    { "type": "checkbox", "id": "preselect", "label": "Pre-select the first option", "info": "Leave off so the customer must choose a size deliberately.", "default": false },
+    { "type": "checkbox", "id": "show_dynamic_checkout", "label": "Show express payment buttons", "default": true },
+    { "type": "text", "id": "validation_message", "label": "Message when no option is chosen", "default": "Please choose a [option]." },
+    { "type": "page", "id": "size_guide_page", "label": "Size guide page" },
+    { "type": "text", "id": "size_guide_label", "label": "Size guide link label", "default": "Size guide" },
+    { "type": "textarea", "id": "delivery_note", "label": "Delivery and returns note", "default": "Delivered across the EU. 14-day right of withdrawal on every order." },
+    { "type": "checkbox", "id": "enable_sticky_bar", "label": "Sticky bar on mobile", "info": "Appears once the main button scrolls out of view.", "default": true },
+    { "type": "header", "content": "Section" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-1" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Top padding", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Bottom padding", "default": 56 }
+  ],
+  "blocks": [
+    {
+      "type": "metafield_row",
+      "name": "Metafield accordion",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Fabric & composition" },
+        { "type": "text", "id": "key", "label": "Metafield key", "info": "Under the custom namespace, e.g. fabric_composition. The row is hidden when the product has no value.", "default": "fabric_composition" }
+      ]
+    },
+    {
+      "type": "text_row",
+      "name": "Text accordion",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Delivery & returns" },
+        { "type": "richtext", "id": "content", "label": "Content" }
+      ]
+    },
+    {
+      "type": "page_row",
+      "name": "Page accordion",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Care" },
+        { "type": "page", "id": "page", "label": "Page" }
+      ]
+    },
+    {
+      "type": "eu_info",
+      "name": "EU product information",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Shows manufacturer and EU responsible person details from product metafields. Each line appears only when that product has a value — nothing is invented." },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Product information" }
+      ]
+    }
+  ]
+}
+{% endschema %}

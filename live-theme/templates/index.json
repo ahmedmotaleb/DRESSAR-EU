@@ -1,0 +1,327 @@
+{
+  "sections": {
+    "hero": {
+      "type": "dressar-hero",
+      "settings": {
+        "media_type": "colour",
+        "block_colour": "#382B26",
+        "eyebrow": "New season",
+        "heading": "Modesty, reimagined.",
+        "text": "Modern silhouettes. Considered proportions. Designed around movement.",
+        "cta_label": "Discover the collection",
+        "cta_style": "outline",
+        "cta2_label": "New in",
+        "height": "lg",
+        "position_block": "middle",
+        "position_inline": "left",
+        "text_colour": "#F7F4EF",
+        "overlay_opacity": 20,
+        "color_scheme": "scheme-1"
+      }
+    },
+    "categories": {
+      "type": "dressar-categories",
+      "blocks": {
+        "c1": {
+          "type": "category",
+          "settings": {
+            "title": "Dresses"
+          }
+        },
+        "c2": {
+          "type": "category",
+          "settings": {
+            "title": "Skirts"
+          }
+        },
+        "c3": {
+          "type": "category",
+          "settings": {
+            "title": "Tops"
+          }
+        },
+        "c4": {
+          "type": "category",
+          "settings": {
+            "title": "Sets"
+          }
+        }
+      },
+      "block_order": [
+        "c1",
+        "c2",
+        "c3",
+        "c4"
+      ],
+      "settings": {
+        "heading": "Shop by category",
+        "layout": "even",
+        "columns": 4,
+        "image_ratio": "portrait",
+        "show_count": false,
+        "color_scheme": "scheme-1",
+        "padding_top": 64,
+        "padding_bottom": 40
+      }
+    },
+    "new_in": {
+      "type": "dressar-rail",
+      "settings": {
+        "heading": "What's new",
+        "show_view_all": true,
+        "cta_label": "Shop now",
+        "layout": "rail",
+        "products_to_show": 10,
+        "per_view": 4,
+        "image_ratio": "tall",
+        "show_second_image": true,
+        "meta_source": "type",
+        "color_scheme": "scheme-1",
+        "padding_top": 48,
+        "padding_bottom": 48
+      }
+    },
+    "statement": {
+      "type": "dressar-statement",
+      "settings": {
+        "heading": "Designed with coverage in mind. Created without compromising style.",
+        "text": "<p>Opaque fabrics. Considered lengths. Sleeves that stay where you put them.</p>",
+        "width": "medium",
+        "color_scheme": "scheme-2",
+        "padding_top": 96,
+        "padding_bottom": 96
+      }
+    },
+    "trio": {
+      "type": "dressar-trio",
+      "blocks": {
+        "t1": {
+          "type": "story",
+          "settings": {
+            "eyebrow": "On our radar",
+            "heading": "Layering, done lightly",
+            "cta": "Shop now"
+          }
+        },
+        "t2": {
+          "type": "story",
+          "settings": {
+            "eyebrow": "The fabric",
+            "heading": "Why we line everything",
+            "cta": "Read more"
+          }
+        },
+        "t3": {
+          "type": "story",
+          "settings": {
+            "eyebrow": "New arrivals",
+            "heading": "The winter coat, reconsidered",
+            "cta": "Shop now"
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3"
+      ],
+      "settings": {
+        "full_width": false,
+        "color_scheme": "scheme-1",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "best_sellers": {
+      "type": "dressar-rail",
+      "settings": {
+        "heading": "Best sellers",
+        "show_view_all": true,
+        "cta_label": "Shop now",
+        "layout": "rail",
+        "products_to_show": 10,
+        "per_view": 4,
+        "image_ratio": "tall",
+        "show_second_image": true,
+        "meta_source": "type",
+        "color_scheme": "scheme-1",
+        "padding_top": 48,
+        "padding_bottom": 48
+      }
+    },
+    "look": {
+      "type": "dressar-look",
+      "blocks": {
+        "l1": {
+          "type": "look_product",
+          "settings": {}
+        },
+        "l2": {
+          "type": "look_product",
+          "settings": {}
+        },
+        "l3": {
+          "type": "look_product",
+          "settings": {}
+        },
+        "l4": {
+          "type": "look_product",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "l1",
+        "l2",
+        "l3",
+        "l4"
+      ],
+      "settings": {
+        "eyebrow": "Styled together",
+        "heading": "Shop the look",
+        "image_position": "left",
+        "meta_source": "type",
+        "color_scheme": "scheme-1",
+        "padding_top": 56,
+        "padding_bottom": 56
+      }
+    },
+    "occasion": {
+      "type": "dressar-categories",
+      "blocks": {
+        "o1": {
+          "type": "category",
+          "settings": {
+            "title": "Everyday"
+          }
+        },
+        "o2": {
+          "type": "category",
+          "settings": {
+            "title": "Work"
+          }
+        },
+        "o3": {
+          "type": "category",
+          "settings": {
+            "title": "Occasion"
+          }
+        },
+        "o4": {
+          "type": "category",
+          "settings": {
+            "title": "Travel"
+          }
+        }
+      },
+      "block_order": [
+        "o1",
+        "o2",
+        "o3",
+        "o4"
+      ],
+      "settings": {
+        "heading": "Shop by occasion",
+        "layout": "even",
+        "columns": 4,
+        "image_ratio": "landscape",
+        "show_count": false,
+        "color_scheme": "scheme-1",
+        "padding_top": 48,
+        "padding_bottom": 48
+      }
+    },
+    "trust": {
+      "type": "dressar-trust",
+      "blocks": {
+        "t1": {
+          "type": "item",
+          "settings": {
+            "icon": "icon-truck",
+            "title": "EU delivery",
+            "text": "Tracked across the European Union."
+          }
+        },
+        "t2": {
+          "type": "item",
+          "settings": {
+            "icon": "icon-return",
+            "title": "Easy returns",
+            "text": "14-day right of withdrawal on every order."
+          }
+        },
+        "t3": {
+          "type": "item",
+          "settings": {
+            "icon": "icon-padlock",
+            "title": "Secure payment",
+            "text": "Card, Apple Pay and Google Pay."
+          }
+        },
+        "t4": {
+          "type": "item",
+          "settings": {
+            "icon": "icon-chat-bubble",
+            "title": "Customer care",
+            "text": "Monday to Friday, 9am to 5pm."
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "heading": "The Dressar letter",
+            "heading_size": "h1"
+          }
+        },
+        "paragraph": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>New collections, styling notes and private releases.</p>"
+          }
+        },
+        "email_form": {
+          "type": "email_form",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "heading",
+        "paragraph",
+        "email_form"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "full_width": true,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "categories",
+    "new_in",
+    "statement",
+    "trio",
+    "best_sellers",
+    "look",
+    "occasion",
+    "trust",
+    "newsletter"
+  ]
+}

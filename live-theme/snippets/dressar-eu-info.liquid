@@ -1,0 +1,77 @@
+{%- comment -%}
+  EU product information.
+
+  Renders only the fields this product actually has a value for. Nothing is
+  substituted or inferred — an empty metafield means the line is absent, and if
+  every field is empty the whole accordion does not render.
+
+  Expects metafields under the `custom` namespace:
+    manufacturer_name, manufacturer_postal_address, manufacturer_email,
+    eu_responsible_person_name, eu_responsible_person_postal_address,
+    eu_responsible_person_email, product_identifier, country_of_origin,
+    warnings_or_safety_information
+{%- endcomment -%}
+
+{%- liquid
+  assign m = product.metafields.custom
+
+  assign has_any = false
+  if m.manufacturer_name.value != blank or m.manufacturer_postal_address.value != blank or m.manufacturer_email.value != blank
+    assign has_any = true
+  endif
+  if m.eu_responsible_person_name.value != blank or m.eu_responsible_person_postal_address.value != blank or m.eu_responsible_person_email.value != blank
+    assign has_any = true
+  endif
+  if m.product_identifier.value != blank or m.country_of_origin.value != blank or m.warnings_or_safety_information.value != blank
+    assign has_any = true
+  endif
+-%}
+
+{%- if has_any -%}
+  <details class="dr-acc__item" {{ block.shopify_attributes }}>
+    <summary class="dr-acc__head">
+      <span>{{ heading }}</span>
+      <span class="dr-acc__sign" aria-hidden="true"></span>
+    </summary>
+    <div class="dr-acc__body">
+      <dl class="dr-eu">
+        {%- if m.product_identifier.value != blank -%}
+          <dt>Product identifier</dt><dd>{{ m.product_identifier.value }}</dd>
+        {%- endif -%}
+        {%- if m.country_of_origin.value != blank -%}
+          <dt>Country of origin</dt><dd>{{ m.country_of_origin.value }}</dd>
+        {%- endif -%}
+
+        {%- if m.manufacturer_name.value != blank -%}
+          <dt>Manufacturer</dt>
+          <dd>
+            {{ m.manufacturer_name.value }}
+            {%- if m.manufacturer_postal_address.value != blank -%}
+              <br>{{ m.manufacturer_postal_address.value }}
+            {%- endif -%}
+            {%- if m.manufacturer_email.value != blank -%}
+              <br><a href="mailto:{{ m.manufacturer_email.value }}">{{ m.manufacturer_email.value }}</a>
+            {%- endif -%}
+          </dd>
+        {%- endif -%}
+
+        {%- if m.eu_responsible_person_name.value != blank -%}
+          <dt>EU responsible person</dt>
+          <dd>
+            {{ m.eu_responsible_person_name.value }}
+            {%- if m.eu_responsible_person_postal_address.value != blank -%}
+              <br>{{ m.eu_responsible_person_postal_address.value }}
+            {%- endif -%}
+            {%- if m.eu_responsible_person_email.value != blank -%}
+              <br><a href="mailto:{{ m.eu_responsible_person_email.value }}">{{ m.eu_responsible_person_email.value }}</a>
+            {%- endif -%}
+          </dd>
+        {%- endif -%}
+
+        {%- if m.warnings_or_safety_information.value != blank -%}
+          <dt>Safety information</dt><dd>{{ m.warnings_or_safety_information.value }}</dd>
+        {%- endif -%}
+      </dl>
+    </div>
+  </details>
+{%- endif -%}

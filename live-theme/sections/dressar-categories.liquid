@@ -1,0 +1,151 @@
+{{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section
+  class="dr-section color-{{ s.color_scheme }} gradient"
+  style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px;"
+>
+  {%- if s.heading != blank or s.eyebrow != blank -%}
+    <div class="dr-wrap dr-head">
+      {%- if s.eyebrow != blank -%}<p class="dr-head__eyebrow">{{ s.eyebrow }}</p>{%- endif -%}
+      {%- if s.heading != blank -%}<h2 class="dr-head__title">{{ s.heading }}</h2>{%- endif -%}
+      {%- if s.text != blank -%}<p class="dr-head__text">{{ s.text }}</p>{%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="dr-wrap">
+    <div class="dr-cats dr-cats--{{ s.layout }}" style="--dr-cat-cols: {{ s.columns }};">
+      {%- for block in section.blocks -%}
+        {%- assign coll = block.settings.collection -%}
+        {%- assign img = block.settings.image | default: coll.featured_image -%}
+        <a class="dr-cat" href="{{ coll.url | default: block.settings.link }}" {{ block.shopify_attributes }}>
+          <span class="dr-cat__media dr-cat__media--{{ s.image_ratio }}">
+            {%- if img -%}
+              <img
+                src="{{ img | image_url: width: 900 }}"
+                srcset="{{ img | image_url: width: 450 }} 450w, {{ img | image_url: width: 900 }} 900w"
+                sizes="(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw"
+                alt="{{ img.alt | default: coll.title | escape }}"
+                width="{{ img.width }}"
+                height="{{ img.height }}"
+                loading="lazy"
+              >
+            {%- else -%}
+              {{ 'collection-1' | placeholder_svg_tag: '' }}
+            {%- endif -%}
+          </span>
+          <span class="dr-cat__label">
+            <span class="dr-cat__name">{{ block.settings.title | default: coll.title }}</span>
+            {%- if s.show_count and coll != blank -%}
+              <span class="dr-cat__count">
+                {{- 'products.facets.product_count_simple' | t: count: coll.all_products_count -}}
+              </span>
+            {%- endif -%}
+          </span>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.dr-cats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.6rem;
+}
+@media screen and (min-width: 750px) {
+  .dr-cats { gap: 2.4rem; grid-template-columns: repeat(var(--dr-cat-cols, 4), minmax(0, 1fr)); }
+}
+.dr-cat { display: block; text-decoration: none; color: inherit; }
+.dr-cat__media {
+  display: block;
+  overflow: hidden;
+  background: rgba(var(--color-foreground), .03);
+}
+.dr-cat__media--portrait { aspect-ratio: 3 / 4; }
+.dr-cat__media--tall { aspect-ratio: 2 / 3; }
+.dr-cat__media--landscape { aspect-ratio: 4 / 3; }
+.dr-cat__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .7s ease;
+}
+.dr-cat:hover .dr-cat__media img { transform: scale(1.04); }
+.dr-cat__label {
+  display: block;
+  text-align: center;
+  padding-top: 1.4rem;
+}
+.dr-cat__name {
+  display: block;
+  font-size: 1.4rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.dr-cat:hover .dr-cat__name { text-decoration: underline; text-underline-offset: .4rem; }
+.dr-cat__count { display: block; font-size: 1.2rem; opacity: .55; margin-top: .5rem; }
+
+/* asymmetric: first tile spans two columns and runs taller */
+@media screen and (min-width: 750px) {
+  .dr-cats--asymmetric > .dr-cat:first-child { grid-column: span 2; grid-row: span 2; }
+  .dr-cats--asymmetric > .dr-cat:first-child .dr-cat__media { aspect-ratio: auto; height: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dr-cat__media img { transition-duration: .01ms !important; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Category grid",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by category" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    {
+      "type": "select", "id": "layout", "label": "Layout", "default": "even",
+      "options": [
+        { "value": "even", "label": "Even grid" },
+        { "value": "asymmetric", "label": "Asymmetric — first tile larger" }
+      ]
+    },
+    { "type": "range", "id": "columns", "min": 2, "max": 5, "step": 1, "label": "Columns on desktop", "default": 4 },
+    {
+      "type": "select", "id": "image_ratio", "label": "Image ratio", "default": "portrait",
+      "options": [
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "tall", "label": "Tall (2:3)" },
+        { "value": "landscape", "label": "Landscape (4:3)" }
+      ]
+    },
+    { "type": "checkbox", "id": "show_count", "label": "Show product count", "default": false },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-1" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Top padding", "default": 56 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Bottom padding", "default": 40 }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "text", "id": "title", "label": "Override title" },
+        { "type": "image_picker", "id": "image", "label": "Override image" },
+        { "type": "url", "id": "link", "label": "Link", "info": "Only used when no collection is chosen." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category grid",
+      "blocks": [{ "type": "category" }, { "type": "category" }, { "type": "category" }, { "type": "category" }]
+    }
+  ]
+}
+{% endschema %}

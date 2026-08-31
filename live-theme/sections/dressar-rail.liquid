@@ -1,0 +1,145 @@
+{{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'dressar-rail.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign coll = section.settings.collection
+  assign count = section.settings.products_to_show
+-%}
+
+<section
+  class="dr-section color-{{ section.settings.color_scheme }} gradient"
+  style="--dr-pt: {{ section.settings.padding_top }}px; --dr-pb: {{ section.settings.padding_bottom }}px;"
+>
+  {%- if section.settings.heading != blank or section.settings.eyebrow != blank -%}
+    <div class="dr-wrap dr-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="dr-head__eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="dr-head__title">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+      {%- if section.settings.text != blank -%}
+        <p class="dr-head__text">{{ section.settings.text }}</p>
+      {%- endif -%}
+      {%- if section.settings.show_view_all and coll != blank -%}
+        <a class="dr-head__cta" href="{{ coll.url }}">
+          {{- section.settings.cta_label | default: 'Shop now' -}}
+        </a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- if section.settings.layout == 'rail' -%}
+    <div class="dr-rail" data-dr-rail>
+      <button
+        type="button"
+        class="dr-rail__nav dr-rail__nav--prev"
+        data-dr-rail-prev
+        aria-label="{{ 'general.slider.previous_slide' | t }}"
+      >
+        {{- 'icon-caret.svg' | inline_asset_content -}}
+      </button>
+
+      <div class="dr-rail__track" data-dr-rail-track style="--dr-per-view: {{ section.settings.per_view }};">
+        {%- for product in coll.products limit: count -%}
+          {% render 'dressar-card',
+            card_product: product,
+            ratio: section.settings.image_ratio,
+            show_second: section.settings.show_second_image,
+            meta_source: section.settings.meta_source,
+            index: forloop.index
+          %}
+        {%- else -%}
+          {%- for i in (1..6) -%}
+            <div class="dr-card">
+              <div class="dr-card__media dr-card__media--{{ section.settings.image_ratio }}">
+                {{ 'product-1' | placeholder_svg_tag: '' }}
+              </div>
+              <div class="dr-card__body">
+                <h3 class="dr-card__title">{{ 'onboarding.product_title' | t }}</h3>
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endfor -%}
+      </div>
+
+      <button
+        type="button"
+        class="dr-rail__nav dr-rail__nav--next"
+        data-dr-rail-next
+        aria-label="{{ 'general.slider.next_slide' | t }}"
+      >
+        {{- 'icon-caret.svg' | inline_asset_content -}}
+      </button>
+    </div>
+  {%- else -%}
+    <div class="dr-wrap">
+      <div class="dr-grid" style="--dr-cols: {{ section.settings.per_view }};">
+        {%- for product in coll.products limit: count -%}
+          {% render 'dressar-card',
+            card_product: product,
+            ratio: section.settings.image_ratio,
+            show_second: section.settings.show_second_image,
+            meta_source: section.settings.meta_source,
+            index: forloop.index
+          %}
+        {%- else -%}
+          {%- for i in (1..4) -%}
+            <div class="dr-card">
+              <div class="dr-card__media dr-card__media--{{ section.settings.image_ratio }}">
+                {{ 'product-1' | placeholder_svg_tag: '' }}
+              </div>
+              <div class="dr-card__body">
+                <h3 class="dr-card__title">{{ 'onboarding.product_title' | t }}</h3>
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Product rail",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What's new" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "checkbox", "id": "show_view_all", "label": "Show link under the heading", "default": true },
+    { "type": "text", "id": "cta_label", "label": "Link label", "default": "Shop now" },
+    { "type": "header", "content": "Layout" },
+    {
+      "type": "select", "id": "layout", "label": "Layout", "default": "rail",
+      "options": [{ "value": "rail", "label": "Horizontal rail" }, { "value": "grid", "label": "Grid" }]
+    },
+    { "type": "range", "id": "products_to_show", "min": 4, "max": 16, "step": 1, "label": "Products", "default": 8 },
+    { "type": "range", "id": "per_view", "min": 3, "max": 6, "step": 1, "label": "Per row on desktop", "default": 4 },
+    {
+      "type": "select", "id": "image_ratio", "label": "Image ratio", "default": "tall",
+      "options": [
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "tall", "label": "Tall (2:3)" },
+        { "value": "square", "label": "Square" }
+      ]
+    },
+    { "type": "checkbox", "id": "show_second_image", "label": "Second image on hover", "default": true },
+    {
+      "type": "select", "id": "meta_source", "label": "Line above the title", "default": "type",
+      "info": "Shown in small caps, where the product has a value.",
+      "options": [
+        { "value": "none", "label": "Nothing" },
+        { "value": "type", "label": "Product type" },
+        { "value": "fabric", "label": "Fabric metafield" }
+      ]
+    },
+    { "type": "header", "content": "Section" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-1" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Top padding", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Bottom padding", "default": 48 }
+  ],
+  "presets": [{ "name": "Product rail" }]
+}
+{% endschema %}

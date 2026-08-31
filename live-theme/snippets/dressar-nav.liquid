@@ -1,0 +1,93 @@
+{%- comment -%}
+  Renders desktop navigation. A top-level item with children renders as a mega menu
+  when it has grandchildren or a matching promotion block, otherwise a dropdown.
+
+  Accepts:
+    - menu:    linklist
+    - section: the header section, for promotion blocks
+{%- endcomment -%}
+
+<ul class="dressar-nav" role="list">
+  {%- for link in menu.links -%}
+    {%- liquid
+      assign is_mega = false
+      if link.links.size > 0
+        for child in link.links
+          if child.links.size > 0
+            assign is_mega = true
+            break
+          endif
+        endfor
+      endif
+
+      assign promo = null
+      for block in section.blocks
+        if block.type == 'mega_promo' and block.settings.parent == link.title
+          assign promo = block
+          assign is_mega = true
+        endif
+      endfor
+    -%}
+
+    <li
+      class="dressar-nav__item{% if is_mega %} dressar-nav__item--mega{% endif %}"
+      {% if link.active or link.child_active %}aria-current="page"{% endif %}
+    >
+      <a class="dressar-nav__link" href="{{ link.url }}">{{ link.title }}</a>
+
+      {%- if is_mega -%}
+        <div class="dressar-mega">
+          <div class="dressar-mega__inner">
+            {%- for child in link.links -%}
+              <div class="dressar-mega__col">
+                <p class="dressar-mega__title">{{ child.title }}</p>
+                {%- if child.links.size > 0 -%}
+                  <ul class="dressar-mega__list" role="list">
+                    {%- for grandchild in child.links -%}
+                      <li><a href="{{ grandchild.url }}">{{ grandchild.title }}</a></li>
+                    {%- endfor -%}
+                  </ul>
+                {%- else -%}
+                  <ul class="dressar-mega__list" role="list">
+                    <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+                  </ul>
+                {%- endif -%}
+              </div>
+            {%- endfor -%}
+
+            {%- if promo -%}
+              <div class="dressar-mega__col" {{ promo.shopify_attributes }}>
+                <a class="dressar-promo" href="{{ promo.settings.link }}">
+                  {%- if promo.settings.image -%}
+                    <img
+                      src="{{ promo.settings.image | image_url: width: 600 }}"
+                      alt="{{ promo.settings.image.alt | escape }}"
+                      width="600"
+                      height="750"
+                      loading="lazy"
+                    >
+                  {%- endif -%}
+                  {%- if promo.settings.heading != blank -%}
+                    <p class="dressar-promo__heading">{{ promo.settings.heading }}</p>
+                  {%- endif -%}
+                  {%- if promo.settings.text != blank -%}
+                    <p class="dressar-promo__text">{{ promo.settings.text }}</p>
+                  {%- endif -%}
+                  {%- if promo.settings.cta != blank -%}
+                    <span class="dressar-promo__cta">{{ promo.settings.cta }}</span>
+                  {%- endif -%}
+                </a>
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- elsif link.links.size > 0 -%}
+        <ul class="dressar-menu" role="list">
+          {%- for child in link.links -%}
+            <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </li>
+  {%- endfor -%}
+</ul>

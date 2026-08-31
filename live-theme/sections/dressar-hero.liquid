@@ -1,0 +1,220 @@
+{{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+{%- if section.settings.media_type == 'video' -%}
+  <script src="{{ 'dressar-hero.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- liquid
+  assign s = section.settings
+  assign img = s.image
+  assign img_mobile = s.image_mobile | default: s.image
+  assign is_block = false
+  if s.media_type == 'colour'
+    assign is_block = true
+  endif
+
+  assign is_film = false
+  if s.media_type == 'video' and s.video != blank
+    assign is_film = true
+  endif
+
+  if is_film
+    # Shopify serves each video as both mp4 and m3u8. A silent background loop
+    # wants the progressive mp4, not the streaming manifest.
+    assign film_desktop = ''
+    for source in s.video.sources
+      if source.format == 'mp4'
+        assign film_desktop = source.url
+      endif
+    endfor
+
+    assign film_mobile_video = s.video_mobile | default: s.video
+    assign film_mobile = ''
+    for source in film_mobile_video.sources
+      if source.format == 'mp4'
+        assign film_mobile = source.url
+      endif
+    endfor
+
+    # The poster is the LCP element, so it is always rendered. Fall back through
+    # the merchant's own still, then the frame Shopify extracts from the film.
+    assign poster = s.video_poster | default: s.image | default: s.video.preview_image
+  endif
+-%}
+
+<section
+  class="dr-hero dr-hero--{{ s.height }} dr-hero--{{ s.position_block }} dr-hero--{{ s.position_inline }}{% if is_block %} dr-hero--block{% endif %} color-{{ s.color_scheme }} gradient"
+  {% if is_block %}style="--dr-block-bg: {{ s.block_colour }};"{% endif %}
+>
+  <div class="dr-hero__bg">
+    {%- if is_film -%}
+      {%- if poster != blank -%}
+        <img
+          class="dr-hero__poster"
+          src="{{ poster | image_url: width: 2200 }}"
+          srcset="{{ poster | image_url: width: 900 }} 900w, {{ poster | image_url: width: 1400 }} 1400w, {{ poster | image_url: width: 2200 }} 2200w"
+          sizes="100vw"
+          alt="{{ poster.alt | escape }}"
+          width="{{ poster.width }}"
+          height="{{ poster.height }}"
+          fetchpriority="high"
+          decoding="async"
+        >
+      {%- endif -%}
+      {%- if film_desktop != blank -%}
+        <video
+          class="dr-hero__video"
+          data-dr-hero-video
+          data-src-desktop="{{ film_desktop }}"
+          data-src-mobile="{{ film_mobile }}"
+          data-breakpoint="750"
+          muted
+          loop
+          playsinline
+          preload="none"
+          aria-hidden="true"
+          tabindex="-1"
+        ></video>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- unless is_block or is_film -%}
+      {%- if img -%}
+        <picture>
+          {%- if s.image_mobile -%}
+            <source
+              media="(max-width: 749px)"
+              srcset="{{ img_mobile | image_url: width: 750 }} 750w, {{ img_mobile | image_url: width: 1100 }} 1100w"
+              sizes="100vw"
+            >
+          {%- endif -%}
+          <img
+            src="{{ img | image_url: width: 2200 }}"
+            srcset="{{ img | image_url: width: 900 }} 900w, {{ img | image_url: width: 1400 }} 1400w, {{ img | image_url: width: 2200 }} 2200w"
+            sizes="100vw"
+            alt="{{ img.alt | escape }}"
+            width="{{ img.width }}"
+            height="{{ img.height }}"
+            fetchpriority="high"
+            decoding="async"
+          >
+        </picture>
+      {%- else -%}
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'dr-hero__placeholder' }}
+      {%- endif -%}
+    {%- endunless -%}
+
+    {%- if is_block and s.panel_image -%}
+      <div class="dr-hero__panel">
+        <img
+          src="{{ s.panel_image | image_url: width: 800 }}"
+          srcset="{{ s.panel_image | image_url: width: 400 }} 400w, {{ s.panel_image | image_url: width: 800 }} 800w"
+          sizes="26rem"
+          alt="{{ s.panel_image.alt | escape }}"
+          width="{{ s.panel_image.width }}"
+          height="{{ s.panel_image.height }}"
+          fetchpriority="high"
+          decoding="async"
+        >
+      </div>
+    {%- endif -%}
+
+    {%- if s.overlay_opacity > 0 and is_block == false -%}
+      <div class="dr-hero__scrim" style="background: rgba(0,0,0,{{ s.overlay_opacity | divided_by: 100.0 }});"></div>
+    {%- endif -%}
+  </div>
+
+  <div class="dr-hero__content" style="color: {{ s.text_colour }};">
+    <div class="dr-hero__inner">
+      {%- if s.eyebrow != blank -%}
+        <p class="dr-hero__eyebrow">{{ s.eyebrow }}</p>
+      {%- endif -%}
+
+      {%- if s.heading != blank -%}
+        <h2 class="dr-hero__title">{{ s.heading }}</h2>
+      {%- endif -%}
+
+      {%- if s.text != blank -%}
+        <p class="dr-hero__text">{{ s.text }}</p>
+      {%- endif -%}
+
+      {%- if s.cta_label != blank or s.cta2_label != blank -%}
+        <div class="dr-hero__actions">
+          {%- if s.cta_label != blank -%}
+            <a
+              class="dr-btn{% if s.cta_style == 'link' %} dr-btn--link{% endif %}"
+              href="{{ s.cta_link | default: routes.all_products_collection_url }}"
+            >
+              <span>{{ s.cta_label }}</span>
+            </a>
+          {%- endif -%}
+          {%- if s.cta2_label != blank -%}
+            <a class="dr-btn dr-btn--link" href="{{ s.cta2_link }}">
+              <span>{{ s.cta2_label }}</span>
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    {
+      "type": "select", "id": "media_type", "label": "Background", "default": "image",
+      "options": [{ "value": "image", "label": "Photograph" }, { "value": "video", "label": "Film" }, { "value": "colour", "label": "Colour block" }]
+    },
+    { "type": "video", "id": "video", "label": "Film — desktop", "info": "Silent, looping, no controls. Keep it under about 10 seconds." },
+    { "type": "video", "id": "video_mobile", "label": "Film — mobile", "info": "A separately composed crop. Only one of the two is ever downloaded." },
+    { "type": "image_picker", "id": "video_poster", "label": "Film poster", "info": "Shown while the film loads, and instead of it for visitors who prefer reduced motion. Defaults to the desktop image." },
+    { "type": "image_picker", "id": "image", "label": "Image — desktop" },
+    { "type": "image_picker", "id": "image_mobile", "label": "Image — mobile", "info": "A separately composed crop. Only one of the two is ever downloaded." },
+    { "type": "color", "id": "block_colour", "label": "Block colour", "default": "#E8DED2" },
+    { "type": "image_picker", "id": "panel_image", "label": "Edge image", "info": "Colour block only. Sits along one edge on desktop, hidden on mobile." },
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "New season" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Modesty, reimagined." },
+    { "type": "textarea", "id": "text", "label": "Text", "default": "Modern silhouettes. Considered proportions. Designed around movement." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Discover the collection" },
+    { "type": "url", "id": "cta_link", "label": "Button link" },
+    {
+      "type": "select", "id": "cta_style", "label": "Button style", "default": "outline",
+      "options": [{ "value": "outline", "label": "Outlined" }, { "value": "link", "label": "Underlined text" }]
+    },
+    { "type": "text", "id": "cta2_label", "label": "Second link label" },
+    { "type": "url", "id": "cta2_link", "label": "Second link" },
+    { "type": "header", "content": "Layout" },
+    {
+      "type": "select", "id": "height", "label": "Height", "default": "lg",
+      "options": [
+        { "value": "sm", "label": "Small (52vh)" },
+        { "value": "md", "label": "Medium (70vh)" },
+        { "value": "lg", "label": "Large (85vh)" },
+        { "value": "full", "label": "Full screen" }
+      ]
+    },
+    {
+      "type": "select", "id": "position_block", "label": "Vertical position", "default": "middle",
+      "options": [
+        { "value": "top", "label": "Top" },
+        { "value": "middle", "label": "Middle" },
+        { "value": "bottom", "label": "Bottom" }
+      ]
+    },
+    {
+      "type": "select", "id": "position_inline", "label": "Horizontal position", "default": "left",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "centre", "label": "Centre" },
+        { "value": "right", "label": "Right" }
+      ]
+    },
+    { "type": "color", "id": "text_colour", "label": "Text colour", "default": "#FFFFFF" },
+    { "type": "range", "id": "overlay_opacity", "min": 0, "max": 70, "step": 5, "unit": "%", "label": "Background darkening", "info": "Photograph and film only. Keeps text legible without hiding the garment.", "default": 20 },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-1" }
+  ],
+  "presets": [{ "name": "Hero" }]
+}
+{% endschema %}

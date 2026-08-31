@@ -1,0 +1,155 @@
+{%- comment -%}
+  Collection grid.
+
+  Deliberately keeps Dawn's filtering plumbing intact: the <collection-component>
+  wrapper, the paginate block, the facets aside, and the #ProductGridContainer /
+  #product-grid ids that facets.js swaps on every filter change. Only the card
+  and the grid classes are ours.
+{%- endcomment -%}
+
+{{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+{{ 'component-facets.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<collection-component
+  view-event-payload="{{ collection | standard_event_data: 'view' | escape }}"
+  data-collection-id="{{ collection.id }}"
+>
+  <div
+    class="dr-section color-{{ s.color_scheme }} gradient"
+    style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px;"
+  >
+    {%- paginate collection.products by s.products_per_page -%}
+      {%- if s.enable_filtering or s.enable_sorting -%}
+        <aside
+          aria-labelledby="verticalTitle"
+          class="facets-wrapper page-width{% unless s.enable_filtering %} facets-wrapper--no-filters{% endunless %}"
+          id="main-collection-filters"
+          data-id="{{ section.id }}"
+        >
+          {% render 'facets',
+            results: collection,
+            enable_filtering: s.enable_filtering,
+            enable_sorting: s.enable_sorting,
+            filter_type: s.filter_type,
+            paginate: paginate
+          %}
+        </aside>
+      {%- endif -%}
+
+      <div class="product-grid-container" id="ProductGridContainer">
+        {%- if collection.products.size == 0 -%}
+          <div class="collection collection--empty page-width" id="product-grid" data-id="{{ section.id }}">
+            <div class="loading-overlay gradient"></div>
+            <div class="dr-empty">
+              <p class="dr-empty__title">{{ 'sections.collection_template.empty' | t }}</p>
+              <p class="dr-empty__text">
+                {{-
+                  'sections.collection_template.use_fewer_filters_html'
+                  | t: link: collection.url, class: 'dr-head__cta'
+                -}}
+              </p>
+            </div>
+          </div>
+        {%- else -%}
+          <div class="collection">
+            <div class="loading-overlay gradient"></div>
+            <ul
+              id="product-grid"
+              data-id="{{ section.id }}"
+              class="dr-wrap dr-grid dr-grid--collection"
+              style="--dr-cols: {{ s.columns_desktop }}; --dr-cols-mobile: {{ s.columns_mobile }};"
+            >
+              {%- for product in collection.products -%}
+                <li>
+                  {% render 'dressar-card',
+                    card_product: product,
+                    ratio: s.image_ratio,
+                    show_second: s.show_secondary_image,
+                    meta_source: s.meta_source,
+                    index: forloop.index
+                  %}
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            {%- if paginate.pages > 1 -%}
+              <div class="dr-wrap">
+                {% render 'pagination', paginate: paginate, anchor: '' %}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endpaginate -%}
+  </div>
+</collection-component>
+
+{% stylesheet %}
+.dr-grid--collection { list-style: none; padding-left: 1.5rem; padding-right: 1.5rem; margin: 0; }
+@media screen and (min-width: 990px) {
+  .dr-grid--collection { padding-left: 5rem; padding-right: 5rem; }
+}
+.dr-grid--collection > li { min-width: 0; }
+@media screen and (max-width: 749px) {
+  .dr-grid--collection { grid-template-columns: repeat(var(--dr-cols-mobile, 2), minmax(0, 1fr)); }
+}
+.dr-empty { text-align: center; padding-block: 8rem; }
+.dr-empty__title {
+  font-family: var(--font-heading-family);
+  font-size: clamp(2rem, 1.7rem + 1vw, 2.8rem);
+  margin: 0 0 1rem;
+}
+.dr-empty__text { opacity: .72; margin: 0; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Collection grid",
+  "class": "section",
+  "settings": [
+    { "type": "range", "id": "products_per_page", "min": 8, "max": 36, "step": 4, "label": "Products per page", "default": 24 },
+    { "type": "range", "id": "columns_desktop", "min": 2, "max": 5, "step": 1, "label": "Columns on desktop", "default": 4 },
+    {
+      "type": "select", "id": "columns_mobile", "label": "Columns on mobile", "default": "2",
+      "options": [{ "value": "1", "label": "One" }, { "value": "2", "label": "Two" }]
+    },
+    {
+      "type": "select", "id": "image_ratio", "label": "Image ratio", "default": "tall",
+      "options": [
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "tall", "label": "Tall (2:3)" },
+        { "value": "square", "label": "Square" }
+      ]
+    },
+    { "type": "checkbox", "id": "show_secondary_image", "label": "Second image on hover", "default": true },
+    {
+      "type": "select", "id": "meta_source", "label": "Line above the title", "default": "type",
+      "options": [
+        { "value": "none", "label": "Nothing" },
+        { "value": "type", "label": "Product type" },
+        { "value": "fabric", "label": "Fabric metafield" }
+      ]
+    },
+    { "type": "header", "content": "Filtering" },
+    { "type": "checkbox", "id": "enable_filtering", "label": "Enable filtering", "info": "Filters come from the Search & Discovery app.", "default": true },
+    {
+      "type": "select", "id": "filter_type", "label": "Filter layout", "default": "drawer",
+      "options": [
+        { "value": "horizontal", "label": "Horizontal" },
+        { "value": "vertical", "label": "Sidebar" },
+        { "value": "drawer", "label": "Drawer" }
+      ]
+    },
+    { "type": "checkbox", "id": "enable_sorting", "label": "Enable sorting", "default": true },
+    { "type": "header", "content": "Section" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-1" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Top padding", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Bottom padding", "default": 56 }
+  ]
+}
+{% endschema %}

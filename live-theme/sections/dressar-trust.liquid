@@ -1,0 +1,114 @@
+{{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section
+  class="dr-section color-{{ s.color_scheme }} gradient"
+  style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px;"
+>
+  <div class="dr-wrap">
+    {%- if s.heading != blank -%}
+      <div class="dr-head"><h2 class="dr-head__title">{{ s.heading }}</h2></div>
+    {%- endif -%}
+
+    <ul class="dr-trust" role="list">
+      {%- for block in section.blocks -%}
+        <li class="dr-trust__item" {{ block.shopify_attributes }}>
+          {%- if block.settings.icon != 'none' -%}
+            <span class="dr-trust__icon" aria-hidden="true">
+              {{- block.settings.icon | append: '.svg' | inline_asset_content -}}
+            </span>
+          {%- endif -%}
+          {%- if block.settings.title != blank -%}
+            <p class="dr-trust__title">{{ block.settings.title }}</p>
+          {%- endif -%}
+          {%- if block.settings.text != blank -%}
+            <p class="dr-trust__text">{{ block.settings.text }}</p>
+          {%- endif -%}
+          {%- if block.settings.link_label != blank -%}
+            <a class="dr-trust__link" href="{{ block.settings.link }}">{{ block.settings.link_label }}</a>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% stylesheet %}
+.dr-trust {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3.2rem 2rem;
+}
+@media screen and (min-width: 750px) {
+  .dr-trust { grid-template-columns: repeat(var(--dr-trust-cols, 4), minmax(0, 1fr)); }
+}
+.dr-trust__item { text-align: center; }
+.dr-trust__icon { display: block; margin: 0 auto 1.2rem; width: 2.4rem; height: 2.4rem; }
+.dr-trust__icon svg { width: 100%; height: 100%; }
+.dr-trust__title {
+  font-size: 1.3rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin: 0 0 .6rem;
+}
+.dr-trust__text { font-size: 1.4rem; opacity: .7; margin: 0; }
+.dr-trust__link {
+  display: inline-block;
+  margin-top: .8rem;
+  font-size: 1.2rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border-bottom: 1px solid currentColor;
+  text-decoration: none;
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Trust strip",
+  "max_blocks": 5,
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-2" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Top padding", "default": 56 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Bottom padding", "default": 56 }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "select", "id": "icon", "label": "Icon", "default": "icon-truck",
+          "options": [
+            { "value": "none", "label": "No icon" },
+            { "value": "icon-truck", "label": "Delivery" },
+            { "value": "icon-return", "label": "Returns" },
+            { "value": "icon-padlock", "label": "Secure" },
+            { "value": "icon-chat-bubble", "label": "Support" },
+            { "value": "icon-ruler", "label": "Sizing" },
+            { "value": "icon-leaf", "label": "Fabric" },
+            { "value": "icon-plane", "label": "International" }
+          ]
+        },
+        { "type": "text", "id": "title", "label": "Title", "default": "EU delivery" },
+        { "type": "text", "id": "text", "label": "Text", "default": "Tracked across the European Union." },
+        { "type": "text", "id": "link_label", "label": "Link label" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust strip",
+      "blocks": [{ "type": "item" }, { "type": "item" }, { "type": "item" }, { "type": "item" }]
+    }
+  ]
+}
+{% endschema %}

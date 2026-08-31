@@ -1,0 +1,115 @@
+{%- comment -%}
+  Cookie consent. Categories map to Shopify's Customer Privacy API, which is what
+  actually gates tracking — this markup never touches cookies itself.
+  Lives in the footer group so it renders on every page.
+{%- endcomment -%}
+
+{%- if section.settings.enabled -%}
+  {{ 'dressar-consent.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'dressar-consent.js' | asset_url }}" defer="defer"></script>
+
+  {%- liquid
+    assign s = section.settings
+    assign policy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
+  -%}
+
+  <div
+    class="dr-consent color-{{ s.color_scheme }} gradient"
+    data-dr-consent
+    role="dialog"
+    aria-modal="false"
+    aria-labelledby="DressarConsentTitle"
+    hidden
+  >
+    <h2 class="dr-consent__title" id="DressarConsentTitle">{{ s.title }}</h2>
+    <p class="dr-consent__text">
+      {{ s.body }}
+      <a href="{{ policy_url }}">{{ s.policy_link }}</a>
+    </p>
+
+    <div class="dr-consent__panel" id="DressarConsentPanel" data-dr-consent-panel hidden>
+      <ul class="dr-consent__list" role="list">
+        <li class="dr-consent__row">
+          <span>
+            <strong>{{ s.necessary_label }}</strong>
+            <span class="dr-consent__hint">{{ s.necessary_hint }}</span>
+          </span>
+          <span class="dr-consent__always">{{ s.always_on }}</span>
+        </li>
+
+        <li class="dr-consent__row">
+          <label for="DrConsent-preferences">
+            <strong>{{ s.preferences_label }}</strong>
+            <span class="dr-consent__hint">{{ s.preferences_hint }}</span>
+          </label>
+          <input type="checkbox" id="DrConsent-preferences" data-dr-category="preferences">
+        </li>
+
+        <li class="dr-consent__row">
+          <label for="DrConsent-analytics">
+            <strong>{{ s.analytics_label }}</strong>
+            <span class="dr-consent__hint">{{ s.analytics_hint }}</span>
+          </label>
+          <input type="checkbox" id="DrConsent-analytics" data-dr-category="analytics">
+        </li>
+
+        <li class="dr-consent__row">
+          <label for="DrConsent-marketing">
+            <strong>{{ s.marketing_label }}</strong>
+            <span class="dr-consent__hint">{{ s.marketing_hint }}</span>
+          </label>
+          <input type="checkbox" id="DrConsent-marketing" data-dr-category="marketing">
+        </li>
+      </ul>
+    </div>
+
+    <div class="dr-consent__actions">
+      <button type="button" class="dr-btn dr-btn--solid dr-consent__btn" data-dr-accept>
+        <span>{{ s.accept_label }}</span>
+      </button>
+      <button type="button" class="dr-btn dr-consent__btn" data-dr-reject>
+        <span>{{ s.reject_label }}</span>
+      </button>
+      <button
+        type="button"
+        class="dr-consent__manage"
+        data-dr-manage
+        aria-expanded="false"
+        aria-controls="DressarConsentPanel"
+      >
+        {{ s.manage_label }}
+      </button>
+      <button type="button" class="dr-consent__manage" data-dr-save hidden>
+        {{ s.save_label }}
+      </button>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Cookie consent",
+  "settings": [
+    { "type": "checkbox", "id": "enabled", "label": "Enable", "info": "Required for visitors in the EU and the UK.", "default": true },
+    { "type": "text", "id": "title", "label": "Title", "default": "Before you browse" },
+    { "type": "textarea", "id": "body", "label": "Text", "default": "We use cookies to run this shop and remember your bag. With your permission we also measure how the site is used." },
+    { "type": "text", "id": "policy_link", "label": "Policy link label", "default": "Read our Privacy Policy" },
+    { "type": "text", "id": "accept_label", "label": "Accept button", "default": "Accept all" },
+    { "type": "text", "id": "reject_label", "label": "Reject button", "default": "Essential only" },
+    { "type": "text", "id": "manage_label", "label": "Manage link", "default": "Manage preferences" },
+    { "type": "text", "id": "save_label", "label": "Save link", "default": "Save choices" },
+    { "type": "header", "content": "Categories" },
+    { "type": "text", "id": "necessary_label", "label": "Necessary", "default": "Strictly necessary" },
+    { "type": "text", "id": "necessary_hint", "label": "Necessary description", "default": "Keeps your bag and checkout working." },
+    { "type": "text", "id": "always_on", "label": "Always-on label", "default": "Always on" },
+    { "type": "text", "id": "preferences_label", "label": "Preferences", "default": "Preferences" },
+    { "type": "text", "id": "preferences_hint", "label": "Preferences description", "default": "Remembers your country, language and choices." },
+    { "type": "text", "id": "analytics_label", "label": "Analytics", "default": "Analytics" },
+    { "type": "text", "id": "analytics_hint", "label": "Analytics description", "default": "Tells us which pages people visit." },
+    { "type": "text", "id": "marketing_label", "label": "Marketing", "default": "Marketing" },
+    { "type": "text", "id": "marketing_hint", "label": "Marketing description", "default": "Measures our advertising." },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-1" }
+  ],
+  "enabled_on": { "groups": ["footer"] }
+}
+{% endschema %}
