@@ -65,13 +65,16 @@
               style="--dr-cols: {{ s.columns_desktop }}; --dr-cols-mobile: {{ s.columns_mobile }};"
             >
               {%- for product in collection.products -%}
+                {%- assign card_uid = section.id | append: '-' | append: forloop.index -%}
                 <li>
                   {% render 'dressar-card',
                     card_product: product,
                     ratio: s.image_ratio,
                     show_second: s.show_secondary_image,
                     meta_source: s.meta_source,
-                    index: forloop.index
+                    index: forloop.index,
+                    quick_add: s.quick_add,
+                    uid: card_uid
                   %}
                 </li>
               {%- endfor -%}
@@ -127,6 +130,7 @@
       ]
     },
     { "type": "checkbox", "id": "show_secondary_image", "label": "Second image on hover", "default": true },
+    { "type": "checkbox", "id": "quick_add", "label": "Quick add", "info": "Adds a size picker to each card so shoppers can add to the bag without leaving the grid.", "default": true },
     {
       "type": "select", "id": "meta_source", "label": "Line above the title", "default": "type",
       "options": [

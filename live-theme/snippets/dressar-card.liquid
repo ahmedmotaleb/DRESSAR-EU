@@ -7,6 +7,9 @@
     - show_second:  boolean
     - meta_source:  none | type | fabric
     - index:        forloop index, for image priority
+    - quick_add:    boolean, off unless the caller asks for it
+    - uid:          optional string making element ids unique when the same
+                    product can appear twice on one page
 {%- endcomment -%}
 
 {%- liquid
@@ -110,6 +113,67 @@
         {%- for t in tags -%}
           <span class="dr-tag">{{ t }}</span>
         {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if quick_add and p.available -%}
+      {%- liquid
+        assign quick_uid = uid | default: p.id
+        assign quick_id = 'QuickAdd-' | append: quick_uid
+      -%}
+      {%- comment -%}
+        Ships no JavaScript of its own.
+
+        <details> is the disclosure. The sizes are radios named `id`, so the browser
+        posts the chosen variant on a plain submit and Dawn's FormData picks up the
+        same field in the AJAX path — no dependence on submitter semantics.
+        `required` makes the browser insist on a size before adding.
+
+        <product-form> wraps the form: Dawn's element resolves its form with
+        querySelector, which only looks at descendants.
+      {%- endcomment -%}
+      <div class="dr-quick">
+        <product-form class="product-form" data-hide-errors="false">
+          {%- form 'product', p, id: quick_id, class: 'dr-quick__form', data-type: 'add-to-cart-form' -%}
+            <div class="product-form__error-message-wrapper" role="alert" hidden>
+              <span class="product-form__error-message"></span>
+            </div>
+
+            {%- if p.variants.size == 1 -%}
+              <input type="hidden" name="id" value="{{ p.variants.first.id }}">
+              <button type="submit" name="add" class="dr-btn dr-btn--solid dr-quick__add">
+                <span>{{ 'products.product.add_to_cart' | t }}</span>
+              </button>
+            {%- else -%}
+              <details class="dr-quick__disclosure">
+                <summary class="dr-quick__summary">{{ 'products.product.choose_options' | t }}</summary>
+
+                <fieldset class="dr-quick__sizes">
+                  <legend class="visually-hidden">
+                    {{ 'products.product.choose_product_options' | t: product_name: p.title }}
+                  </legend>
+                  {%- for variant in p.variants -%}
+                    <span class="dr-quick__size">
+                      <input
+                        type="radio"
+                        name="id"
+                        value="{{ variant.id }}"
+                        id="{{ quick_id }}-{{ variant.id }}"
+                        required
+                        {% unless variant.available %}disabled{% endunless %}
+                      >
+                      <label for="{{ quick_id }}-{{ variant.id }}">{{ variant.title }}</label>
+                    </span>
+                  {%- endfor -%}
+                </fieldset>
+
+                <button type="submit" name="add" class="dr-btn dr-btn--solid dr-quick__add">
+                  <span>{{ 'products.product.add_to_cart' | t }}</span>
+                </button>
+              </details>
+            {%- endif -%}
+          {%- endform -%}
+        </product-form>
       </div>
     {%- endif -%}
   </div>

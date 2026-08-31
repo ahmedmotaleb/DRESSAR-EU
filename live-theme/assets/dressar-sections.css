@@ -188,6 +188,77 @@
 }
 .dr-card__colours { font-size: 1.2rem; opacity: .6; margin: 0; }
 
+/* ---- quick add ---- */
+/* .dr-card__title a::after covers the whole card to make it clickable, so every
+   control in here has to sit above it or the overlay eats the clicks. */
+.dr-quick { position: relative; z-index: 2; margin-top: 1.2rem; }
+.dr-quick__disclosure > summary { list-style: none; cursor: pointer; }
+.dr-quick__disclosure > summary::-webkit-details-marker { display: none; }
+.dr-quick__summary {
+  display: inline-block;
+  font-size: 1.2rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: .2rem;
+}
+.dr-quick__summary:hover { opacity: .65; }
+.dr-quick__sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  justify-content: center;
+  border: 0;
+  margin: 1.2rem 0 0;
+  padding: 0;
+  min-width: 0;
+}
+/* The input is stretched over its label and left transparent rather than shrunk to
+   a 1px box: a zero-size control cannot receive focus, and browsers refuse to show
+   the `required` validation bubble on one, reporting an unfocusable form control
+   instead. */
+.dr-quick__size { position: relative; display: inline-flex; }
+.dr-quick__size input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.dr-quick__size label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4rem;
+  min-height: 4.4rem;
+  padding: .6rem 1rem;
+  border: 1px solid rgba(var(--color-foreground), .25);
+  font-size: 1.3rem;
+  transition: border-color .2s ease, background-color .2s ease, color .2s ease;
+}
+.dr-quick__size input:hover + label { border-color: rgb(var(--color-foreground)); }
+.dr-quick__size input:checked + label {
+  background: rgb(var(--color-foreground));
+  color: rgb(var(--color-background));
+  border-color: rgb(var(--color-foreground));
+}
+.dr-quick__size input:focus-visible + label {
+  outline: 2px solid rgb(var(--color-foreground));
+  outline-offset: 2px;
+}
+.dr-quick__size input:disabled { cursor: default; }
+.dr-quick__size input:disabled + label {
+  opacity: .4;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.dr-quick__add { width: 100%; margin-top: 1.2rem; min-height: 4.4rem; padding: 1rem 2rem; }
+@media (prefers-reduced-motion: reduce) {
+  .dr-quick__size label { transition-duration: .01ms !important; }
+}
+
 /* ---- rail ---- */
 .dr-rail { position: relative; }
 .dr-rail__track {
