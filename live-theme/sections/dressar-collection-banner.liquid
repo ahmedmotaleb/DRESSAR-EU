@@ -29,7 +29,13 @@
 
   <div class="dr-collhead__inner dr-wrap"{% if use_image %} style="color: {{ s.text_colour }};"{% endif %}>
     {%- if s.show_breadcrumb -%}
-      <nav class="dr-collhead__crumb" aria-label="{{ 'general.breadcrumbs.label' | t | default: 'Breadcrumbs' }}">
+      {%- comment -%}
+        Literal, not a translation key: Dawn ships no breadcrumbs key, and `t` on a
+        missing key returns "Translation missing: ..." — a non-empty string, so the
+        `default` filter never fires and a screen reader would read that aloud.
+        dressar-product.liquid uses the same literal.
+      {%- endcomment -%}
+      <nav class="dr-collhead__crumb" aria-label="Breadcrumbs">
         <a href="{{ routes.root_url }}">{{ shop.name }}</a>
         <span aria-hidden="true">/</span>
         <span>{{ collection.title }}</span>

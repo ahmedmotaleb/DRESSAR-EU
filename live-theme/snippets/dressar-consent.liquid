@@ -1,67 +1,13 @@
 {%- comment -%}
-  Cookie consent. Categories map to Shopify's Customer Privacy API, which is what
-  actually gates tracking — this markup never touches cookies itself.
+  SUPERSEDED — renders nothing on purpose.
+
+  The cookie consent banner is now sections/dressar-consent.liquid, a section in
+  the footer group whose wording is editable in the theme editor. That is the one
+  to change.
+
+  The markup that used to live here read its text from `consent.*` translation
+  keys that were never added to locales/en.default.json, so rendering it would
+  have printed "Translation missing: en.consent.title" and so on to real
+  customers. It is emptied rather than deleted because theme file deletion is
+  blocked through the Admin API; delete it from Shopify admin if you want it gone.
 {%- endcomment -%}
-
-<div
-  class="dr-consent"
-  data-dr-consent
-  role="dialog"
-  aria-modal="false"
-  aria-labelledby="DressarConsentTitle"
-  hidden
->
-  <h2 class="dr-consent__title" id="DressarConsentTitle">{{ 'consent.title' | t }}</h2>
-  <p class="dr-consent__text">
-    {{ 'consent.body' | t }}
-    <a href="{{ shop.privacy_policy.url | default: '/policies/privacy-policy' }}">{{ 'consent.policy_link' | t }}</a>
-  </p>
-
-  <div class="dr-consent__panel" id="DressarConsentPanel" data-dr-consent-panel hidden>
-    <ul class="dr-consent__list" role="list">
-      <li class="dr-consent__row">
-        <span>
-          <strong>{{ 'consent.necessary' | t }}</strong>
-          <span class="dr-consent__hint">{{ 'consent.necessary_hint' | t }}</span>
-        </span>
-        <span class="dr-consent__always">{{ 'consent.always_on' | t }}</span>
-      </li>
-
-      {%- assign categories = 'preferences,analytics,marketing' | split: ',' -%}
-      {%- for category in categories -%}
-        <li class="dr-consent__row">
-          <label for="DrConsent-{{ category }}">
-            <strong>{{ 'consent.' | append: category | t }}</strong>
-            <span class="dr-consent__hint">{{ 'consent.' | append: category | append: '_hint' | t }}</span>
-          </label>
-          <input
-            type="checkbox"
-            id="DrConsent-{{ category }}"
-            data-dr-category="{{ category }}"
-          >
-        </li>
-      {%- endfor -%}
-    </ul>
-  </div>
-
-  <div class="dr-consent__actions">
-    <button type="button" class="dr-btn dr-btn--solid dr-consent__btn" data-dr-accept>
-      <span>{{ 'consent.accept' | t }}</span>
-    </button>
-    <button type="button" class="dr-btn dr-consent__btn" data-dr-reject>
-      <span>{{ 'consent.reject' | t }}</span>
-    </button>
-    <button
-      type="button"
-      class="dr-consent__manage"
-      data-dr-manage
-      aria-expanded="false"
-      aria-controls="DressarConsentPanel"
-    >
-      {{ 'consent.manage' | t }}
-    </button>
-    <button type="button" class="dr-consent__manage" data-dr-save hidden>
-      {{ 'consent.save' | t }}
-    </button>
-  </div>
-</div>
