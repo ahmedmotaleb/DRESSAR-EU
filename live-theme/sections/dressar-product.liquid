@@ -91,6 +91,13 @@
           {%- endif -%}
         </p>
 
+        {%- comment -%}
+          <product-form> must WRAP the form, not sit inside it: Dawn's element does
+          `this.form = this.querySelector('form')`, a descendant lookup, then
+          immediately dereferences it. With the form as an ancestor that is null and
+          the element throws on connect, losing the AJAX add and the cart drawer.
+        {%- endcomment -%}
+        <product-form class="product-form" data-hide-errors="false" data-section-id="{{ section.id }}">
         {%- form 'product',
           product,
           id: form_id,
@@ -158,38 +165,37 @@
             hidden
           ></p>
 
-          <div class="dr-pdp__buy" data-dr-sticky-anchor>
-            <product-form class="product-form" data-hide-errors="false" data-section-id="{{ section.id }}">
-              <div class="product-form__error-message-wrapper" role="alert" hidden>
-                <span class="product-form__error-message"></span>
-              </div>
+          <div class="product-form__error-message-wrapper" role="alert" hidden>
+            <span class="product-form__error-message"></span>
+          </div>
 
-              <button
-                id="ProductSubmitButton-{{ section.id }}"
-                type="submit"
-                name="add"
-                class="dr-btn dr-btn--solid dr-btn--full product-form__submit"
-                data-dr-submit
-                data-text-add="{{ 'products.product.add_to_cart' | t | escape }}"
-                data-text-soldout="{{ 'products.product.sold_out' | t | escape }}"
-                data-text-unavailable="{{ 'products.product.unavailable' | t | escape }}"
-                {% unless v.available %}disabled{% endunless %}
-              >
-                <span>
-                  {%- if v.available -%}
-                    {{ 'products.product.add_to_cart' | t }}
-                  {%- else -%}
-                    {{ 'products.product.sold_out' | t }}
-                  {%- endif -%}
-                </span>
-              </button>
-            </product-form>
+          <div class="dr-pdp__buy" data-dr-sticky-anchor>
+            <button
+              id="ProductSubmitButton-{{ section.id }}"
+              type="submit"
+              name="add"
+              class="dr-btn dr-btn--solid dr-btn--full product-form__submit"
+              data-dr-submit
+              data-text-add="{{ 'products.product.add_to_cart' | t | escape }}"
+              data-text-soldout="{{ 'products.product.sold_out' | t | escape }}"
+              data-text-unavailable="{{ 'products.product.unavailable' | t | escape }}"
+              {% unless v.available %}disabled{% endunless %}
+            >
+              <span>
+                {%- if v.available -%}
+                  {{ 'products.product.add_to_cart' | t }}
+                {%- else -%}
+                  {{ 'products.product.sold_out' | t }}
+                {%- endif -%}
+              </span>
+            </button>
 
             {%- if s.show_dynamic_checkout -%}
-              {{ form | payment_button }}
+            {{ form | payment_button }}
             {%- endif -%}
           </div>
         {%- endform -%}
+        </product-form>
 
         {%- if s.delivery_note != blank -%}
           <p class="dr-pdp__delivery">{{ s.delivery_note }}</p>
