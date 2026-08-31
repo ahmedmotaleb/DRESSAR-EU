@@ -209,14 +209,20 @@
           {%- for block in section.blocks -%}
             {%- case block.type -%}
               {%- when 'metafield_row' -%}
-                {%- assign val = product.metafields.custom[block.settings.key].value -%}
-                {%- if val != blank -%}
+                {%- assign mf = product.metafields.custom[block.settings.key] -%}
+                {%- if mf.value != blank -%}
                   <details class="dr-acc__item" {{ block.shopify_attributes }}>
                     <summary class="dr-acc__head">
                       <span>{{ block.settings.heading }}</span>
                       <span class="dr-acc__sign" aria-hidden="true"></span>
                     </summary>
-                    <div class="dr-acc__body rte">{{ val }}</div>
+                    {%- comment -%}
+                      metafield_tag, not the raw value: a rich_text_field stores a
+                      JSON document, so printing .value would dump the structure
+                      rather than the text. metafield_tag renders every type
+                      correctly, which matters because the key is merchant-set.
+                    {%- endcomment -%}
+                    <div class="dr-acc__body rte">{{ mf | metafield_tag }}</div>
                   </details>
                 {%- endif -%}
               {%- when 'text_row' -%}

@@ -168,7 +168,8 @@
 .dr-eu { margin: 0; display: grid; gap: .4rem 1.6rem; }
 @media screen and (min-width: 600px) { .dr-eu { grid-template-columns: auto 1fr; } }
 .dr-eu dt { font-size: 1.2rem; letter-spacing: .1em; text-transform: uppercase; opacity: .6; }
-.dr-eu dd { margin: 0 0 1.2rem; }
+/* Postal addresses arrive as multi-line metafields; keep their line breaks. */
+.dr-eu dd { margin: 0 0 1.2rem; white-space: pre-line; }
 @media screen and (min-width: 600px) { .dr-eu dd { margin-bottom: .8rem; } }
 
 /* ---- mobile sticky bar ---- */
