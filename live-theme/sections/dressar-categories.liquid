@@ -19,9 +19,22 @@
   <div class="dr-wrap">
     <div class="dr-cats dr-cats--{{ s.layout }}" style="--dr-cat-cols: {{ s.columns }};">
       {%- for block in section.blocks -%}
-        {%- assign coll = block.settings.collection -%}
-        {%- assign img = block.settings.image | default: coll.featured_image -%}
-        <a class="dr-cat" href="{{ coll.url | default: block.settings.link }}" {{ block.shopify_attributes }}>
+        {%- liquid
+          assign coll = block.settings.collection
+          assign img = block.settings.image | default: coll.featured_image
+          assign destination = coll.url | default: block.settings.link
+        -%}
+        {%- comment -%}
+          A tile with neither a collection nor a link renders as a plain <span>.
+          It used to fall through to href="", which resolves to the current page,
+          so clicking a tile silently reloaded the page it was already on and
+          looked like a broken site rather than an unconfigured one.
+        {%- endcomment -%}
+        <{% if destination != blank %}a{% else %}span{% endif %}
+          class="dr-cat{% unless destination != blank %} dr-cat--unlinked{% endunless %}"
+          {% if destination != blank %}href="{{ destination }}"{% endif %}
+          {{ block.shopify_attributes }}
+        >
           <span class="dr-cat__media dr-cat__media--{{ s.image_ratio }}">
             {%- if img -%}
               <img
@@ -45,7 +58,7 @@
               </span>
             {%- endif -%}
           </span>
-        </a>
+        </{% if destination != blank %}a{% else %}span{% endif %}>
       {%- endfor -%}
     </div>
   </div>
@@ -88,6 +101,10 @@
   text-transform: uppercase;
 }
 .dr-cat:hover .dr-cat__name { text-decoration: underline; text-underline-offset: .4rem; }
+/* An unconfigured tile is not a link, so it must not behave like one on hover. */
+.dr-cat--unlinked { cursor: default; }
+.dr-cat--unlinked:hover .dr-cat__name { text-decoration: none; }
+.dr-cat--unlinked:hover .dr-cat__media img { transform: none; }
 .dr-cat__count { display: block; font-size: 1.2rem; opacity: .55; margin-top: .5rem; }
 
 /* asymmetric: first tile spans two columns and runs taller */

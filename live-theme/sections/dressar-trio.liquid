@@ -19,8 +19,20 @@
   <div class="dr-wrap{% if s.full_width %} dr-wrap--wide{% endif %}">
     <div class="dr-trio">
       {%- for block in section.blocks -%}
-        <article class="dr-trio__item" {{ block.shopify_attributes }}>
-          <a class="dr-trio__media" href="{{ block.settings.link }}" tabindex="-1" aria-hidden="true">
+        {%- assign link = block.settings.link -%}
+        <article
+          class="dr-trio__item{% unless link != blank %} dr-trio__item--unlinked{% endunless %}"
+          {{ block.shopify_attributes }}
+        >
+          {%- comment -%}
+            The media duplicates the CTA below and is hidden from assistive tech, so it
+            is only a link when there is somewhere to go. As a bare <a href="">, it
+            resolved to the current page: clicking a tile reloaded the homepage.
+          {%- endcomment -%}
+          <{% if link != blank %}a{% else %}div{% endif %}
+            class="dr-trio__media"
+            {% if link != blank %}href="{{ link }}" tabindex="-1" aria-hidden="true"{% endif %}
+          >
             {%- if block.settings.image -%}
               <img
                 src="{{ block.settings.image | image_url: width: 1000 }}"
@@ -34,7 +46,7 @@
             {%- else -%}
               {{ 'lifestyle-2' | placeholder_svg_tag: '' }}
             {%- endif -%}
-          </a>
+          </{% if link != blank %}a{% else %}div{% endif %}>
 
           {%- if block.settings.eyebrow != blank -%}
             <p class="dr-trio__eyebrow">{{ block.settings.eyebrow }}</p>
@@ -44,14 +56,21 @@
             <h3 class="dr-trio__title">{{ block.settings.heading }}</h3>
           {%- endif -%}
 
-          {%- if block.settings.cta != blank -%}
-            <a class="dr-head__cta" href="{{ block.settings.link }}">{{ block.settings.cta }}</a>
+          {%- if block.settings.cta != blank and link != blank -%}
+            <a class="dr-head__cta" href="{{ link }}">{{ block.settings.cta }}</a>
           {%- endif -%}
         </article>
       {%- endfor -%}
     </div>
   </div>
 </section>
+
+{% stylesheet %}
+/* The rule this cancels lives in dressar-sections.css at the same specificity, and the
+   load order of a section stylesheet against a linked asset is not guaranteed — so the
+   class is doubled to win on specificity rather than on position. */
+.dr-trio__item.dr-trio__item--unlinked:hover .dr-trio__media img { transform: none; }
+{% endstylesheet %}
 
 {% schema %}
 {

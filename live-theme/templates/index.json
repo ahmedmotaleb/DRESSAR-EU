@@ -25,25 +25,29 @@
         "c1": {
           "type": "category",
           "settings": {
-            "title": "Dresses"
+            "collection": "tops",
+            "title": "Tops"
           }
         },
         "c2": {
           "type": "category",
           "settings": {
+            "collection": "skirts",
             "title": "Skirts"
           }
         },
         "c3": {
           "type": "category",
           "settings": {
-            "title": "Tops"
+            "collection": "jackets",
+            "title": "Outerwear"
           }
         },
         "c4": {
           "type": "category",
           "settings": {
-            "title": "Sets"
+            "collection": "dresses",
+            "title": "Dresses"
           }
         }
       },
@@ -68,8 +72,9 @@
       "type": "dressar-rail",
       "settings": {
         "heading": "What's new",
+        "collection": "new-in",
         "show_view_all": true,
-        "cta_label": "Shop now",
+        "cta_label": "Shop new in",
         "layout": "rail",
         "products_to_show": 10,
         "per_view": 4,
@@ -100,7 +105,8 @@
           "settings": {
             "eyebrow": "On our radar",
             "heading": "Layering, done lightly",
-            "cta": "Shop now"
+            "cta": "Shop now",
+            "link": "/collections/jackets"
           }
         },
         "t2": {
@@ -116,7 +122,8 @@
           "settings": {
             "eyebrow": "New arrivals",
             "heading": "The winter coat, reconsidered",
-            "cta": "Shop now"
+            "cta": "Shop now",
+            "link": "/collections/new-in"
           }
         }
       },
@@ -135,9 +142,10 @@
     "best_sellers": {
       "type": "dressar-rail",
       "settings": {
-        "heading": "Best sellers",
+        "heading": "The tops edit",
+        "collection": "tops",
         "show_view_all": true,
-        "cta_label": "Shop now",
+        "cta_label": "Shop tops",
         "layout": "rail",
         "products_to_show": 10,
         "per_view": 4,
@@ -183,7 +191,8 @@
         "color_scheme": "scheme-1",
         "padding_top": 56,
         "padding_bottom": 56
-      }
+      },
+      "disabled": true
     },
     "occasion": {
       "type": "dressar-categories",
@@ -228,7 +237,8 @@
         "color_scheme": "scheme-1",
         "padding_top": 48,
         "padding_bottom": 48
-      }
+      },
+      "disabled": true
     },
     "trust": {
       "type": "dressar-trust",
