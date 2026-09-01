@@ -1,4 +1,6 @@
 {{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+{{ 'dressar-card.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'dressar-card.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign s = section.settings
@@ -41,9 +43,11 @@
               <div {{ block.shopify_attributes }}>
                 {% render 'dressar-card',
                   card_product: block.settings.product,
-                  ratio: 'tall',
+                  ratio: 'portrait',
                   show_second: false,
-                  meta_source: s.meta_source
+                  meta_source: s.meta_source,
+                  show_swatches: true,
+                  swatch_limit: 4
                 %}
               </div>
             {%- endif -%}

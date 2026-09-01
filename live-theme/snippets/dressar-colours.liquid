@@ -1,0 +1,171 @@
+{%- comment -%}
+  The colour set for a product, resolved from whichever of two very different
+  data models the product actually uses, and rendered identically either way.
+
+  MODE A — the product has a native colour option, so each colour is a variant.
+  MODE B — the product belongs to a Product Family metaobject, so each colour is a
+           separate Shopify product with its own URL, inventory and photography.
+
+  Dressar's catalogue is mode B today: every product carries a single Size option
+  and the colour lives in the product itself. Mode A is supported anyway, because
+  a merchant adding a colour option to one product should not need a code change.
+
+  The shopper must not be able to tell which model a product uses, so both branches
+  emit the same element, the same classes and the same data attributes. Everything
+  downstream — card, PDP, JS — reads that one shape and never asks which mode it is.
+
+  Accepts:
+    - product:  product
+    - output:   'swatches' (default) | 'label'
+    - limit:    swatches shown before the "+n" control; 0 or blank means all
+    - selected: product, the family member currently on display (defaults to product)
+    - colour_word:  plural noun for the count line, default "colours"
+    - colour_label: group label for assistive technology, default "Colour"
+
+  The two words above are parameters rather than `| t` lookups because Dawn's locale
+  has no key for either. `'x' | t | default: 'y'` does NOT fall back: a missing key
+  returns the non-empty string "Translation missing: ...", so `default` never fires
+  and a screen reader reads that aloud. Sections pass merchant-editable settings in.
+
+  Usage:
+    {% render 'dressar-colours', product: p, output: 'label' %}
+    {% render 'dressar-colours', product: p, output: 'swatches', limit: 4 %}
+{%- endcomment -%}
+
+{%- liquid
+  assign out = output | default: 'swatches'
+  assign shown = limit | default: 4
+  assign current = selected | default: product
+  assign word = colour_word | default: 'colours'
+  assign group_label = colour_label | default: 'Colour'
+
+  assign mode = ''
+  assign colour_option = null
+
+  for opt in product.options_with_values
+    assign dn = opt.name | downcase
+    if dn contains 'colour' or dn contains 'color'
+      assign colour_option = opt
+      assign mode = 'variants'
+      break
+    endif
+  endfor
+
+  assign family = product.metafields.custom.product_family.value
+  if mode == blank and family != blank
+    assign siblings = family.products.value
+    if siblings.size > 0
+      assign mode = 'family'
+    endif
+  endif
+-%}
+
+{%- if mode == blank -%}
+  {%- comment -%} No colour data of any kind. Render nothing rather than a lonely swatch. {%- endcomment -%}
+
+{%- elsif out == 'label' -%}
+  {%- liquid
+    if mode == 'variants'
+      assign count = colour_option.values.size
+      assign current_label = colour_option.selected_value
+    else
+      assign count = siblings.size
+      assign current_label = current.metafields.custom.colour_name.value | default: current.title
+    endif
+  -%}
+  <p class="dr-card__colour" data-dr-colour-label>
+    <span data-dr-colour-name>{{ current_label }}</span>
+    {%- comment -%} Only ever rendered above one, so the plural always applies. {%- endcomment -%}
+    {%- if count > 1 -%}
+      <span aria-hidden="true"> · </span>
+      <span>{{ count }} {{ word }}</span>
+    {%- endif -%}
+  </p>
+
+{%- else -%}
+  {%- liquid
+    if mode == 'variants'
+      assign total = colour_option.values.size
+    else
+      assign total = siblings.size
+    endif
+    assign overflow = 0
+    if shown > 0 and total > shown
+      assign overflow = total | minus: shown
+    endif
+  -%}
+  {%- if total > 1 -%}
+    <div class="dr-swatches" data-dr-swatches role="group" aria-label="{{ group_label }}">
+      {%- if mode == 'variants' -%}
+        {%- assign colour_index = colour_option.position | minus: 1 -%}
+        {%- for value in colour_option.values -%}
+          {%- liquid
+            assign swatch_media = null
+            for variant in product.variants
+              if variant.options[colour_index] == value and variant.featured_media
+                assign swatch_media = variant.featured_media
+                break
+              endif
+            endfor
+            assign swatch_media = swatch_media | default: product.featured_media
+          -%}
+          {%- render 'dressar-swatch',
+            label: value,
+            url: value.product_url,
+            media: swatch_media,
+            swatch: value.swatch,
+            hex: null,
+            image: null,
+            price: product.price,
+            compare_at: product.compare_at_price,
+            title: product.title,
+            available: value.available,
+            is_current: value.selected,
+            hidden: forloop.index0,
+            shown: shown
+          -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- for sibling in siblings -%}
+          {%- liquid
+            assign sib_label = sibling.metafields.custom.colour_name.value | default: sibling.title
+            assign sib_title = sibling.metafields.custom.display_title.value | default: sibling.title
+            assign is_current = false
+            if sibling.id == current.id
+              assign is_current = true
+            endif
+          -%}
+          {%- render 'dressar-swatch',
+            label: sib_label,
+            url: sibling.url,
+            media: sibling.featured_media,
+            swatch: null,
+            hex: sibling.metafields.custom.colour_hex,
+            image: sibling.metafields.custom.colour_swatch.value,
+            price: sibling.price,
+            compare_at: sibling.compare_at_price,
+            title: sib_title,
+            available: sibling.available,
+            is_current: is_current,
+            hidden: forloop.index0,
+            shown: shown
+          -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if overflow > 0 -%}
+        {%- comment -%}
+          Hidden swatches are in the DOM but display:none, so revealing them is a class
+          toggle rather than a fetch. The control is a real button: it changes what is
+          on screen and goes nowhere, so it must not be a link.
+        {%- endcomment -%}
+        <button
+          type="button"
+          class="dr-swatches__more"
+          data-dr-swatch-more
+          aria-expanded="false"
+        >+{{ overflow }}</button>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- endif -%}

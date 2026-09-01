@@ -1,0 +1,231 @@
+/* Dressar product card.
+   Photography leads; the container is invisible. No border, no shadow, no radius,
+   no permanent add-to-cart. Colour and type come from Dawn's theme settings so the
+   merchant's palette still drives everything here. */
+
+.dr-card { position: relative; display: flex; flex-direction: column; min-width: 0; }
+
+/* ---- media ---- */
+.dr-card__media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: rgba(var(--color-foreground), .03);
+}
+/* Dressar sells long garments. 3:4 is the default because a 1:1 or 2:3 crop cuts the
+   hemline off a maxi skirt, which is the single most important thing about it. */
+.dr-card__media--portrait { aspect-ratio: 3 / 4; }
+.dr-card__media--45 { aspect-ratio: 4 / 5; }
+.dr-card__media--tall { aspect-ratio: 2 / 3; }
+.dr-card__media--square { aspect-ratio: 1 / 1; }
+/* Natural keeps the photographer's own framing, so no ratio is imposed at all. */
+.dr-card__media--natural { aspect-ratio: auto; }
+
+.dr-card__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity .3s ease, transform .5s ease;
+}
+.dr-card__media--natural .dr-card__img { position: static; height: auto; }
+/* Contain shows the whole garment including the hem, at the cost of letterboxing —
+   so the letterbox gets a quiet ground rather than the page background. */
+.dr-card__media--contain { background: rgba(var(--color-foreground), .04); }
+.dr-card__media--contain .dr-card__img { object-fit: contain; }
+
+.dr-card__img--alt { opacity: 0; }
+@media (hover: hover) {
+  .dr-card:hover .dr-card__img--main { opacity: 0; }
+  .dr-card:hover .dr-card__img--alt { opacity: 1; }
+  /* Restrained on purpose. Anything past a couple of percent reads as a marketplace. */
+  .dr-card:hover .dr-card__img { transform: scale(1.02); }
+}
+
+/* ---- badges ---- */
+.dr-card__badges {
+  position: absolute;
+  top: .8rem;
+  left: .8rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .4rem;
+  pointer-events: none;
+}
+.dr-badge {
+  display: inline-block;
+  padding: .35rem .7rem;
+  font-size: 1rem;
+  line-height: 1.2;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+}
+.dr-badge--sold-out { background: rgba(var(--color-foreground), .82); color: rgb(var(--color-background)); }
+
+/* ---- wishlist ---- */
+/* Small mark, generous hit area: the visual chip is 2.4rem but the button is 4.4rem,
+   which clears the 44px touch target without making the card look like a toolbar. */
+.dr-card__wish {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  width: 4.4rem;
+  height: 4.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: rgb(var(--color-foreground));
+  cursor: pointer;
+  opacity: .75;
+}
+.dr-card__wish:hover { opacity: 1; }
+.dr-card__wish svg { width: 2rem; height: 2rem; }
+.dr-card__wish[aria-pressed='true'] svg { fill: currentColor; }
+
+/* ---- quick add ---- */
+/* Bottom-right inside the image, never a full-width button under the card. */
+.dr-card__quick {
+  position: absolute;
+  right: .8rem;
+  bottom: .8rem;
+  z-index: 2;
+  width: 3.6rem;
+  height: 3.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+  text-decoration: none;
+  opacity: .9;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.dr-card__quick-plus { position: relative; width: 1.4rem; height: 1.4rem; }
+.dr-card__quick-plus::before,
+.dr-card__quick-plus::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto 0;
+  height: 1px;
+  background: currentColor;
+}
+.dr-card__quick-plus::after { transform: rotate(90deg); }
+/* On a touch screen there is no hover to reveal it, so it stays visible but quiet. */
+@media (hover: hover) {
+  .dr-card__quick { opacity: 0; transform: translateY(.4rem); }
+  .dr-card:hover .dr-card__quick,
+  .dr-card__quick:focus-visible { opacity: 1; transform: none; }
+}
+.dr-card__quick.is-loading .dr-card__quick-plus { display: none; }
+.dr-card__quick-spinner {
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 1px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: dr-card-spin .7s linear infinite;
+}
+@keyframes dr-card-spin { to { transform: rotate(360deg); } }
+
+/* ---- body ---- */
+/* Left aligned. Centred captions look like a lookbook, not a catalogue you can shop. */
+.dr-card__body { display: grid; text-align: left; padding-top: 1.4rem; }
+.dr-card__meta {
+  font-size: 1.1rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .55;
+  margin: 0 0 .4rem;
+}
+.dr-card__title { font-size: 1.4rem; font-weight: 500; line-height: 1.35; margin: 0; }
+@media screen and (min-width: 990px) { .dr-card__title { font-size: 1.5rem; } }
+.dr-card__title a { text-decoration: none; color: inherit; }
+/* One overlay makes the whole card clickable, so there is a single link per card in
+   the accessibility tree instead of one for the image and another for the title. */
+.dr-card__title a::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+/* Two lines, hard. A long name must not push one card's price out of line with its
+   neighbours — that misalignment is what makes a grid look cheap. */
+.dr-card__title span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.dr-card__colour { font-size: 1.2rem; opacity: .6; margin: .4rem 0 0; }
+.dr-card__price { font-size: 1.4rem; margin: .4rem 0 0; display: flex; gap: .8rem; flex-wrap: wrap; align-items: baseline; }
+.dr-card__price-was { font-size: 1.2rem; opacity: .45; }
+.dr-card__price-off { font-size: 1.2rem; opacity: .7; }
+
+/* ---- swatches ---- */
+.dr-swatches { position: relative; z-index: 2; display: flex; align-items: center; gap: .6rem; margin-top: .9rem; flex-wrap: wrap; }
+.dr-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  text-decoration: none;
+  color: inherit;
+}
+.dr-swatch__chip {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background-color: var(--dr-swatch-colour, transparent);
+  background-image: var(--dr-swatch-image, none);
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(var(--color-foreground), .22);
+}
+.dr-swatch.is-current .dr-swatch__chip { box-shadow: inset 0 0 0 1px rgba(var(--color-foreground), .22), 0 0 0 1px rgb(var(--color-background)), 0 0 0 2px rgb(var(--color-foreground)); }
+.dr-swatch:focus-visible { outline: 2px solid rgb(var(--color-foreground)); outline-offset: 2px; }
+/* Sold-out colours stay visible and are struck through rather than only dimmed,
+   because opacity alone communicates nothing to a colour-blind shopper. */
+.dr-swatch.is-unavailable .dr-swatch__chip { opacity: .45; }
+.dr-swatch.is-unavailable { position: relative; }
+.dr-swatch.is-unavailable::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2rem;
+  height: 1px;
+  background: rgba(var(--color-foreground), .6);
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+/* No swatch data at all: show the colour's name rather than an invented chip. */
+.dr-swatch--text { width: auto; padding: 0 .6rem; font-size: 1.1rem; letter-spacing: .06em; text-transform: uppercase; box-shadow: inset 0 0 0 1px rgba(var(--color-foreground), .22); }
+.dr-swatch--overflow { display: none; }
+.dr-swatches.is-expanded .dr-swatch--overflow { display: inline-flex; }
+.dr-swatches__more {
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1.1rem;
+  letter-spacing: .06em;
+  cursor: pointer;
+  padding: 0 .4rem;
+  opacity: .7;
+}
+.dr-swatches__more:hover { opacity: 1; }
+.dr-swatches.is-expanded .dr-swatches__more { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dr-card__img, .dr-card__quick { transition-duration: .01ms !important; }
+  .dr-card:hover .dr-card__img { transform: none; }
+  .dr-card__quick-spinner { animation-duration: 2s; }
+}
+
+/* After a swatch swap the card shows a different garment, and we do not have that
+   garment's second photograph without another request — so the hover swap is turned
+   off rather than left to reveal the previous colour's alternate shot. */
+.dr-card--swapped .dr-card__img--alt { display: none; }
+.dr-card--swapped:hover .dr-card__img--main { opacity: 1; }

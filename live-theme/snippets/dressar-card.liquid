@@ -1,63 +1,81 @@
 {%- comment -%}
-  Product card. Image-led, no card chrome.
+  The Dressar product card. One component, used by the collection grid, the
+  homepage rails, recommendations, complete the look and recently viewed, so a
+  change to card design happens in exactly one place.
+
+  Photography leads. There is no border, no shadow and no permanent add-to-cart
+  button; every control lives inside the image and stays quiet until hover.
+
+  The media is a <div>, not a link. The whole card is made clickable by an
+  ::after overlay on the title's anchor, which means one link per card for
+  assistive technology instead of two, and — the reason it is a div — a <button>
+  may not be nested inside an <a>. The quick-add and wishlist controls sit above
+  that overlay on the z axis or the overlay would swallow their clicks.
 
   Accepts:
-    - card_product: product
-    - ratio:        portrait | tall | square   (default tall)
-    - show_second:  boolean
-    - meta_source:  none | type | fabric
-    - index:        forloop index, for image priority
-    - quick_add:    boolean, off unless the caller asks for it
-    - uid:          optional string making element ids unique when the same
-                    product can appear twice on one page
+    - card_product:   product (required)
+    - ratio:          portrait (3:4, default) | 45 (4:5) | natural | tall | square
+    - fit:            cover (default) | contain
+    - show_second:    boolean, second image on hover
+    - meta_source:    none | type | fabric
+    - index:          forloop index, used only to prioritise above-the-fold images
+    - quick_add:      boolean
+    - show_swatches:  boolean
+    - swatch_limit:   integer, swatches before the "+n" control
+    - show_wishlist:  boolean
+    - wishlist_label: verb for the save control, default "Save"
+    - colour_word:    plural noun for the colour count, default "colours"
+    - colour_label:   group label for the swatches, default "Colour"
+    - show_discount:  boolean, show "-28%" next to a reduced price
+    - uid:            string, keeps ids unique when a product repeats on a page
 {%- endcomment -%}
 
 {%- liquid
   assign p = card_product
-  assign r = ratio | default: 'tall'
-  assign second = p.media[1]
+  assign r = ratio | default: 'portrait'
+  assign object_fit = fit | default: 'cover'
 
-  assign colour_option = null
-  for opt in p.options_with_values
-    assign dn = opt.name | downcase
-    if dn contains 'colour' or dn contains 'color'
-      assign colour_option = opt
-    endif
-  endfor
+  assign title = p.metafields.custom.display_title.value | default: p.title
+
+  assign second = p.metafields.custom.secondary_card_image.value
+  unless second
+    assign second = p.media[1]
+  endunless
 
   assign meta = ''
   if meta_source == 'type' and p.type != blank
     assign meta = p.type
   elsif meta_source == 'fabric'
-    assign meta = p.metafields.custom.fabric.value
+    assign meta = p.metafields.custom.fabric_composition.value
   endif
 
-  assign v = p.selected_or_first_available_variant
-  assign low_stock = false
-  if v.available and v.inventory_management != blank and v.inventory_quantity > 0 and v.inventory_quantity <= 3
-    assign low_stock = true
+  assign on_sale = false
+  if p.compare_at_price > p.price
+    assign on_sale = true
   endif
 -%}
 
-<div class="dr-card">
-  <a class="dr-card__media dr-card__media--{{ r }}" href="{{ p.url }}" tabindex="-1" aria-hidden="true">
+<div class="dr-card" data-dr-card data-product-url="{{ p.url }}" data-product-handle="{{ p.handle }}">
+  <div class="dr-card__media dr-card__media--{{ r }} dr-card__media--{{ object_fit }}">
     {%- if p.featured_media -%}
       <img
-        class="dr-card__img--main"
+        class="dr-card__img dr-card__img--main"
+        data-dr-card-img
         src="{{ p.featured_media | image_url: width: 800 }}"
         srcset="{{ p.featured_media | image_url: width: 400 }} 400w, {{ p.featured_media | image_url: width: 800 }} 800w, {{ p.featured_media | image_url: width: 1200 }} 1200w"
-        sizes="(min-width: 990px) 22vw, (min-width: 750px) 33vw, 50vw"
-        alt="{{ p.featured_media.alt | default: p.title | escape }}"
+        sizes="(min-width: 990px) 24vw, (min-width: 750px) 33vw, 50vw"
+        alt="{{ p.featured_media.alt | default: title | escape }}"
         width="{{ p.featured_media.width }}"
         height="{{ p.featured_media.height }}"
         {% if index and index <= 4 %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
       >
       {%- if show_second and second -%}
         <img
-          class="dr-card__img--alt"
+          class="dr-card__img dr-card__img--alt"
+          data-dr-card-img-alt
           src="{{ second | image_url: width: 800 }}"
           srcset="{{ second | image_url: width: 400 }} 400w, {{ second | image_url: width: 800 }} 800w"
-          sizes="(min-width: 990px) 22vw, (min-width: 750px) 33vw, 50vw"
+          sizes="(min-width: 990px) 24vw, (min-width: 750px) 33vw, 50vw"
           alt=""
           width="{{ second.width }}"
           height="{{ second.height }}"
@@ -65,130 +83,114 @@
         >
       {%- endif -%}
     {%- else -%}
-      {{ 'product-1' | placeholder_svg_tag: 'dr-card__img--main' }}
-    {%- endif -%}
-  </a>
-
-  <div class="dr-card__body">
-    {%- if p.available == false -%}
-      <p class="dr-card__status">{{ 'products.product.sold_out' | t }}</p>
-    {%- elsif low_stock -%}
-      <p class="dr-card__status">
-        {{ 'products.product.inventory_low_stock_show_count' | t: quantity: v.inventory_quantity }}
-      </p>
+      {{ 'product-1' | placeholder_svg_tag: 'dr-card__img dr-card__img--main' }}
     {%- endif -%}
 
-    {%- if meta != blank -%}
-      <p class="dr-card__meta">{{ meta }}</p>
-    {%- endif -%}
-
-    <h3 class="dr-card__title"><a href="{{ p.url }}">{{ p.title }}</a></h3>
-
-    <p class="dr-card__price">
-      {%- if p.compare_at_price > p.price -%}
-        <span>{{ p.price | money }}</span>
-        <s>{{ p.compare_at_price | money }}</s>
-      {%- elsif p.price_varies -%}
-        {%- assign from_price = p.price | money -%}
-        <span>{{ 'products.product.price.from_price_html' | t: price: from_price }}</span>
-      {%- else -%}
-        <span>{{ p.price | money }}</span>
-      {%- endif -%}
-    </p>
-
-    {%- if colour_option and colour_option.values.size > 1 -%}
-      <p class="dr-card__colours">+ {{ colour_option.values.size }} {{ colour_option.name | downcase }}</p>
-    {%- endif -%}
-
-    {%- assign tag_list = '' -%}
-    {%- if p.tags contains 'Bestseller' or p.tags contains 'Best sellers' -%}
-      {%- assign tag_list = tag_list | append: 'Bestseller,' -%}
-    {%- endif -%}
-    {%- if p.tags contains 'Exclusive' -%}
-      {%- assign tag_list = tag_list | append: 'Exclusive,' -%}
-    {%- endif -%}
-    {%- if tag_list != blank -%}
-      <div class="dr-card__tags">
-        {%- assign tags = tag_list | split: ',' -%}
-        {%- for t in tags -%}
-          <span class="dr-tag">{{ t }}</span>
+    {%- comment -%}
+      Badges. Capped at two, hard, and every one of them is derived from real data:
+      sold out and sale come from inventory and price, the rest from a metafield the
+      merchant fills in. Nothing here can invent urgency.
+    {%- endcomment -%}
+    {%- liquid
+      assign badges = ''
+      unless p.available
+        assign badges = badges | append: 'sold-out|' | append: 'products.product.sold_out' | append: '||'
+      endunless
+      if on_sale and p.available
+        assign badges = badges | append: 'sale|' | append: 'products.product.on_sale' | append: '||'
+      endif
+      assign extra = p.metafields.custom.product_badges.value
+      if extra
+        for b in extra
+          assign badges = badges | append: 'note|' | append: b | append: '||'
+        endfor
+      endif
+      assign badge_list = badges | split: '||'
+    -%}
+    {%- if badge_list.size > 0 -%}
+      <div class="dr-card__badges">
+        {%- for entry in badge_list limit: 2 -%}
+          {%- assign parts = entry | split: '|' -%}
+          <span class="dr-badge dr-badge--{{ parts[0] }}">
+            {%- if parts[0] == 'note' -%}{{ parts[1] }}{%- else -%}{{ parts[1] | t }}{%- endif -%}
+          </span>
         {%- endfor -%}
       </div>
     {%- endif -%}
 
-    {%- if quick_add and p.available -%}
-      {%- liquid
-        assign quick_uid = uid | default: p.id
-        assign quick_id = 'QuickAdd-' | append: quick_uid
-      -%}
+    {%- if show_wishlist -%}
       {%- comment -%}
-        Ships no JavaScript of its own.
-
-        <details> is the disclosure. The sizes are radios named `id`, so the browser
-        posts the chosen variant on a plain submit and Dawn's FormData picks up the
-        same field in the AJAX path — no dependence on submitter semantics.
-        `required` makes the browser insist on a size before adding.
-
-        <product-form> wraps the form: Dawn's element resolves its form with
-        querySelector, which only looks at descendants.
+        Deliberately inert on its own. It stores nothing and shows no saved state,
+        because there is no wishlist backend on this store — a heart that forgets
+        every reload is worse than no heart. It dispatches `dressar:wishlist` and
+        waits for an app to listen, and the theme setting is off until one does.
       {%- endcomment -%}
-      <div class="dr-quick">
-        {%- comment -%}
-          Each button carries a .loading__spinner because Dawn's submit handler
-          dereferences it unconditionally after calling preventDefault.
-        {%- endcomment -%}
-        <product-form class="product-form" data-hide-errors="false">
-          {%- form 'product', p, id: quick_id, class: 'dr-quick__form', data-type: 'add-to-cart-form' -%}
-            <div class="product-form__error-message-wrapper" role="alert" hidden>
-              <span class="product-form__error-message"></span>
-            </div>
+      <button
+        type="button"
+        class="dr-card__wish"
+        data-dr-wishlist
+        data-product-id="{{ p.id }}"
+        data-product-handle="{{ p.handle }}"
+        aria-label="{{ wishlist_label | default: 'Save' }} {{ title | escape }}"
+      >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <path d="M12 20.5 3.8 12.6a4.9 4.9 0 0 1 0-7 4.9 4.9 0 0 1 7 0l1.2 1.2 1.2-1.2a4.9 4.9 0 0 1 7 0 4.9 4.9 0 0 1 0 7Z" stroke="currentColor" stroke-width="1.4"/>
+        </svg>
+      </button>
+    {%- endif -%}
 
-            {%- if p.variants.size == 1 -%}
-              <input type="hidden" name="id" value="{{ p.variants.first.id }}">
-              <button type="submit" name="add" class="dr-btn dr-btn--solid dr-quick__add">
-                <span>{{ 'products.product.add_to_cart' | t }}</span>
-                <div class="loading__spinner hidden">
-                  <svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-                    <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
-                  </svg>
-                </div>
-              </button>
-            {%- else -%}
-              <details class="dr-quick__disclosure">
-                <summary class="dr-quick__summary">{{ 'products.product.choose_options' | t }}</summary>
+    {%- if quick_add and p.available -%}
+      {%- comment -%}
+        A link, not a button, so that with JavaScript unavailable it still takes the
+        shopper to the product page where they can buy. The script calls
+        preventDefault and opens the size sheet instead.
+      {%- endcomment -%}
+      <a
+        class="dr-card__quick"
+        href="{{ p.url }}"
+        data-dr-quick
+        data-product-url="{{ p.url }}"
+        aria-label="{{ 'products.product.choose_options' | t }} — {{ title | escape }}"
+      >
+        <span class="dr-card__quick-plus" aria-hidden="true"></span>
+        <span class="dr-card__quick-spinner" aria-hidden="true" hidden></span>
+      </a>
+    {%- endif -%}
+  </div>
 
-                <fieldset class="dr-quick__sizes">
-                  <legend class="visually-hidden">
-                    {{ 'products.product.choose_product_options' | t: product_name: p.title }}
-                  </legend>
-                  {%- for variant in p.variants -%}
-                    <span class="dr-quick__size">
-                      <input
-                        type="radio"
-                        name="id"
-                        value="{{ variant.id }}"
-                        id="{{ quick_id }}-{{ variant.id }}"
-                        required
-                        {% unless variant.available %}disabled{% endunless %}
-                      >
-                      <label for="{{ quick_id }}-{{ variant.id }}">{{ variant.title }}</label>
-                    </span>
-                  {%- endfor -%}
-                </fieldset>
+  <div class="dr-card__body">
+    {%- if meta != blank -%}
+      <p class="dr-card__meta">{{ meta }}</p>
+    {%- endif -%}
 
-                <button type="submit" name="add" class="dr-btn dr-btn--solid dr-quick__add">
-                  <span>{{ 'products.product.add_to_cart' | t }}</span>
-                  <div class="loading__spinner hidden">
-                    <svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-                      <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
-                    </svg>
-                  </div>
-                </button>
-              </details>
-            {%- endif -%}
-          {%- endform -%}
-        </product-form>
-      </div>
+    <h3 class="dr-card__title">
+      <a href="{{ p.url }}" data-dr-card-link><span data-dr-card-title>{{ title }}</span></a>
+    </h3>
+
+    {%- if show_swatches -%}
+      {% render 'dressar-colours', product: p, output: 'label', colour_word: colour_word, colour_label: colour_label %}
+    {%- endif -%}
+
+    <p class="dr-card__price" data-dr-card-price>
+      {%- if on_sale -%}
+        <span class="dr-card__price-now" data-dr-price-now>{{ p.price | money }}</span>
+        <s class="dr-card__price-was" data-dr-price-was>{{ p.compare_at_price | money }}</s>
+        {%- if show_discount -%}
+          {%- assign off = p.compare_at_price | minus: p.price | times: 100.0 | divided_by: p.compare_at_price | round -%}
+          <span class="dr-card__price-off">−{{ off }}%</span>
+        {%- endif -%}
+      {%- elsif p.price_varies -%}
+        {%- assign from_price = p.price | money -%}
+        <span class="dr-card__price-now" data-dr-price-now>
+          {{- 'products.product.price.from_price_html' | t: price: from_price -}}
+        </span>
+      {%- else -%}
+        <span class="dr-card__price-now" data-dr-price-now>{{ p.price | money }}</span>
+      {%- endif -%}
+    </p>
+
+    {%- if show_swatches -%}
+      {% render 'dressar-colours', product: p, output: 'swatches', limit: swatch_limit, colour_word: colour_word, colour_label: colour_label %}
     {%- endif -%}
   </div>
 </div>

@@ -1,4 +1,6 @@
 {{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+{{ 'dressar-card.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'dressar-card.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'dressar-rail.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
@@ -47,7 +49,9 @@
             ratio: section.settings.image_ratio,
             show_second: section.settings.show_second_image,
             meta_source: section.settings.meta_source,
-            index: forloop.index
+            index: forloop.index,
+            show_swatches: true,
+            swatch_limit: 4
           %}
         {%- else -%}
           {%- for i in (1..6) -%}
@@ -81,7 +85,9 @@
             ratio: section.settings.image_ratio,
             show_second: section.settings.show_second_image,
             meta_source: section.settings.meta_source,
-            index: forloop.index
+            index: forloop.index,
+            show_swatches: true,
+            swatch_limit: 4
           %}
         {%- else -%}
           {%- for i in (1..4) -%}

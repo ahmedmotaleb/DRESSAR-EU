@@ -8,8 +8,14 @@
 {%- endcomment -%}
 
 {{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+{{ 'dressar-card.css' | asset_url | stylesheet_tag }}
 {{ 'component-facets.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+{%- comment -%}
+  Card assets are loaded once here by the section, not inside the card snippet, which
+  would emit the same <link> twenty-four times in a full grid.
+{%- endcomment -%}
+<script src="{{ 'dressar-card.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign s = section.settings
@@ -61,8 +67,8 @@
             <ul
               id="product-grid"
               data-id="{{ section.id }}"
-              class="dr-wrap dr-grid dr-grid--collection"
-              style="--dr-cols: {{ s.columns_desktop }}; --dr-cols-mobile: {{ s.columns_mobile }};"
+              class="dr-wrap dr-wrap--shop dr-grid dr-grid--collection"
+              style="--dr-cols: {{ s.columns_desktop }}; --dr-cols-tablet: {{ s.columns_tablet }}; --dr-cols-mobile: {{ s.columns_mobile }};"
             >
               {%- for product in collection.products -%}
                 {%- assign card_uid = section.id | append: '-' | append: forloop.index -%}
@@ -70,10 +76,18 @@
                   {% render 'dressar-card',
                     card_product: product,
                     ratio: s.image_ratio,
+                    fit: s.image_fit,
                     show_second: s.show_secondary_image,
                     meta_source: s.meta_source,
                     index: forloop.index,
                     quick_add: s.quick_add,
+                    show_swatches: s.show_swatches,
+                    swatch_limit: s.swatch_limit,
+                    show_wishlist: s.show_wishlist,
+                    show_discount: s.show_discount,
+                    wishlist_label: s.wishlist_label,
+                    colour_word: s.colour_word,
+                    colour_label: s.colour_label,
                     uid: card_uid
                   %}
                 </li>
@@ -93,14 +107,12 @@
 </collection-component>
 
 {% stylesheet %}
-.dr-grid--collection { list-style: none; padding-left: 1.5rem; padding-right: 1.5rem; margin: 0; }
-@media screen and (min-width: 990px) {
-  .dr-grid--collection { padding-left: 5rem; padding-right: 5rem; }
-}
+/* Padding and columns both come from dressar-sections.css now. They used to be
+   repeated here, which meant the section stylesheet and the linked asset set the
+   same properties at equal specificity — whichever loaded second won, and that
+   order is not guaranteed. */
+.dr-grid--collection { list-style: none; margin: 0; }
 .dr-grid--collection > li { min-width: 0; }
-@media screen and (max-width: 749px) {
-  .dr-grid--collection { grid-template-columns: repeat(var(--dr-cols-mobile, 2), minmax(0, 1fr)); }
-}
 .dr-empty { text-align: center; padding-block: 8rem; }
 .dr-empty__title {
   font-family: var(--font-heading-family);
@@ -116,20 +128,39 @@
   "class": "section",
   "settings": [
     { "type": "range", "id": "products_per_page", "min": 8, "max": 36, "step": 4, "label": "Products per page", "default": 24 },
-    { "type": "range", "id": "columns_desktop", "min": 2, "max": 5, "step": 1, "label": "Columns on desktop", "default": 4 },
+    { "type": "range", "id": "columns_desktop", "min": 3, "max": 5, "step": 1, "label": "Columns on desktop", "default": 4 },
+    { "type": "range", "id": "columns_tablet", "min": 2, "max": 4, "step": 1, "label": "Columns on tablet", "default": 3 },
     {
       "type": "select", "id": "columns_mobile", "label": "Columns on mobile", "default": "2",
       "options": [{ "value": "1", "label": "One" }, { "value": "2", "label": "Two" }]
     },
     {
-      "type": "select", "id": "image_ratio", "label": "Image ratio", "default": "tall",
+      "type": "select", "id": "image_ratio", "label": "Image ratio", "default": "portrait",
+      "info": "Dressar sells long garments. Taller crops cut off hemlines.",
       "options": [
         { "value": "portrait", "label": "Portrait (3:4)" },
-        { "value": "tall", "label": "Tall (2:3)" },
-        { "value": "square", "label": "Square" }
+        { "value": "45", "label": "Portrait (4:5)" },
+        { "value": "natural", "label": "Natural — no crop" }
+      ]
+    },
+    {
+      "type": "select", "id": "image_fit", "label": "Image fit", "default": "cover",
+      "info": "Full garment shows the whole photograph, including the hem, on a neutral ground.",
+      "options": [
+        { "value": "cover", "label": "Cover — fills the frame" },
+        { "value": "contain", "label": "Full garment — nothing cropped" }
       ]
     },
     { "type": "checkbox", "id": "show_secondary_image", "label": "Second image on hover", "default": true },
+    { "type": "header", "content": "Colours" },
+    { "type": "checkbox", "id": "show_swatches", "label": "Show colour swatches", "default": true },
+    { "type": "range", "id": "swatch_limit", "min": 3, "max": 6, "step": 1, "label": "Swatches before “+n”", "default": 4 },
+    { "type": "text", "id": "colour_word", "label": "Word for the colour count", "info": "Shown as “Black · 4 colours”.", "default": "colours" },
+    { "type": "text", "id": "colour_label", "label": "Swatch group label", "info": "Read out by screen readers before the swatches.", "default": "Colour" },
+    { "type": "header", "content": "Card extras" },
+    { "type": "checkbox", "id": "show_discount", "label": "Show discount percentage", "default": false },
+    { "type": "checkbox", "id": "show_wishlist", "label": "Show save control", "info": "Requires a wishlist app. On its own the control stores nothing, so leave it off until an app is installed.", "default": false },
+    { "type": "text", "id": "wishlist_label", "label": "Save control label", "default": "Save" },
     { "type": "checkbox", "id": "quick_add", "label": "Quick add", "info": "Adds a size picker to each card so shoppers can add to the bag without leaving the grid.", "default": true },
     {
       "type": "select", "id": "meta_source", "label": "Line above the title", "default": "type",

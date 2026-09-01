@@ -1,4 +1,6 @@
 {{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+{{ 'dressar-card.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'dressar-card.js' | asset_url }}" defer="defer"></script>
 {{ 'component-facets.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
 
@@ -78,7 +80,7 @@
             <ul
               id="product-grid"
               data-id="{{ section.id }}"
-              class="dr-wrap dr-grid dr-grid--collection"
+              class="dr-wrap dr-wrap--shop dr-grid dr-grid--collection"
               style="--dr-cols: {{ s.columns_desktop }}; --dr-cols-mobile: {{ s.columns_mobile }};"
             >
               {%- for item in search.results -%}
@@ -90,7 +92,9 @@
                         ratio: s.image_ratio,
                         show_second: s.show_secondary_image,
                         meta_source: s.meta_source,
-                        index: forloop.index
+                        index: forloop.index,
+                        show_swatches: true,
+                        swatch_limit: 4
                       %}
                     {%- when 'article' -%}
                       <a class="dr-result" href="{{ item.url }}">

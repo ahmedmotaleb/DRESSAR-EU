@@ -1,0 +1,73 @@
+{%- comment -%}
+  One colour swatch. Shared by both colour modes so the two never drift apart.
+
+  Swatch appearance follows the priority in the brief, most specific first:
+    1. Shopify's native swatch data (option value swatch: colour or image)
+    2. a product-family swatch image  (custom.colour_swatch)
+    3. a flat colour                  (custom.colour_hex)
+    4. nothing renderable — the label is shown as text instead, which is the only
+       honest fallback: an invented colour chip would misdescribe the garment.
+
+  It is an <a> to a real product URL, not a button. With JavaScript the card updates
+  in place; without it the link still goes to the right product, and middle-click and
+  "open in new tab" behave the way shoppers expect. The JS calls preventDefault.
+
+  Prices are rendered here through `money` rather than shipped as cents, so no money
+  formatter is needed in JavaScript and the shopper's locale formatting is preserved.
+
+  Accepts: label, url, media, swatch, hex, image, price, compare_at, title,
+           available, is_current, hidden (index0), shown (visible limit)
+{%- endcomment -%}
+
+{%- liquid
+  assign chip_style = ''
+  assign has_chip = false
+
+  if swatch.image
+    assign chip_url = swatch.image | image_url: width: 60
+    assign chip_style = '--dr-swatch-image: url(' | append: chip_url | append: ');'
+    assign has_chip = true
+  elsif swatch.color
+    assign chip_style = '--dr-swatch-colour: rgb(' | append: swatch.color.rgb | append: ');'
+    assign has_chip = true
+  elsif image != blank
+    assign chip_url = image | image_url: width: 60
+    assign chip_style = '--dr-swatch-image: url(' | append: chip_url | append: ');'
+    assign has_chip = true
+  elsif hex != blank
+    assign chip_style = '--dr-swatch-colour: ' | append: hex | append: ';'
+    assign has_chip = true
+  endif
+
+  assign is_overflow = false
+  if shown > 0 and hidden >= shown
+    assign is_overflow = true
+  endif
+-%}
+
+<a
+  class="dr-swatch{% if has_chip == false %} dr-swatch--text{% endif %}{% if is_current %} is-current{% endif %}{% unless available %} is-unavailable{% endunless %}{% if is_overflow %} dr-swatch--overflow{% endif %}"
+  href="{{ url }}"
+  data-dr-swatch
+  data-colour="{{ label | escape }}"
+  data-title="{{ title | escape }}"
+  data-url="{{ url }}"
+  {% if media %}
+    data-img="{{ media | image_url: width: 800 }}"
+    data-srcset="{{ media | image_url: width: 400 }} 400w, {{ media | image_url: width: 800 }} 800w, {{ media | image_url: width: 1200 }} 1200w"
+    data-alt="{{ media.alt | default: title | escape }}"
+  {% endif %}
+  data-price="{{ price | money }}"
+  {% if compare_at > price %}data-compare="{{ compare_at | money }}"{% endif %}
+  {% if is_current %}aria-current="true"{% endif %}
+>
+  {%- if has_chip -%}
+    <span class="dr-swatch__chip" style="{{ chip_style }}" aria-hidden="true"></span>
+    <span class="visually-hidden">{{ label }}</span>
+  {%- else -%}
+    <span class="dr-swatch__text">{{ label }}</span>
+  {%- endif -%}
+  {%- unless available -%}
+    <span class="visually-hidden">{{ 'products.product.sold_out' | t }}</span>
+  {%- endunless -%}
+</a>

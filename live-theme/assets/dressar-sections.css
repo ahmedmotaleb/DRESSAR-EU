@@ -4,6 +4,12 @@
 .dr-wrap { max-width: var(--page-width); margin-inline: auto; padding-inline: 1.5rem; }
 @media screen and (min-width: 990px) { .dr-wrap { padding-inline: 5rem; } }
 .dr-wrap--wide { max-width: 180rem; }
+/* Shopping surfaces (collection, search) run wider than editorial pages and carry
+   their own side padding, so the grid breathes on a large monitor without the
+   cards stretching to the window edge. */
+.dr-wrap--shop { max-width: 170rem; padding-inline: 1.4rem; }
+@media screen and (min-width: 990px) { .dr-wrap--shop { padding-inline: 4rem; } }
+@media screen and (min-width: 1400px) { .dr-wrap--shop { padding-inline: 6rem; } }
 .dr-wrap--flush { padding-inline: 0; }
 
 .dr-section { padding-block: var(--dr-pt, 4.8rem) var(--dr-pb, 4.8rem); }
@@ -133,132 +139,6 @@
 .dr-hero__panel img { width: 100%; height: 100%; object-fit: cover; }
 @media screen and (max-width: 749px) { .dr-hero__panel { display: none; } }
 
-/* ---- product card ---- */
-.dr-card { position: relative; display: flex; flex-direction: column; min-width: 0; }
-.dr-card__media {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  background: rgba(var(--color-foreground), .03);
-}
-.dr-card__media--portrait { aspect-ratio: 3 / 4; }
-.dr-card__media--tall { aspect-ratio: 2 / 3; }
-.dr-card__media--square { aspect-ratio: 1 / 1; }
-.dr-card__media img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: opacity .45s ease;
-}
-.dr-card__img--alt { opacity: 0; }
-@media (hover: hover) {
-  .dr-card:hover .dr-card__img--main { opacity: 0; }
-  .dr-card:hover .dr-card__img--alt { opacity: 1; }
-}
-
-.dr-card__body { padding-top: 1.4rem; text-align: center; display: grid; gap: .5rem; }
-.dr-card__status {
-  font-size: 1.2rem;
-  letter-spacing: .04em;
-  color: rgb(var(--dr-status, 164, 69, 58));
-  margin: 0;
-}
-.dr-card__meta {
-  font-size: 1.2rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  opacity: .6;
-  margin: 0;
-}
-.dr-card__title { font-size: 1.5rem; font-weight: 400; line-height: 1.4; margin: 0; }
-.dr-card__title a { text-decoration: none; color: inherit; }
-.dr-card__title a::after { content: ''; position: absolute; inset: 0; z-index: 1; }
-.dr-card__price { font-size: 1.5rem; margin: 0; display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; }
-.dr-card__price s { opacity: .5; }
-.dr-card__tags { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-top: .4rem; }
-.dr-tag {
-  display: inline-block;
-  padding: .4rem .9rem;
-  font-size: 1.05rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  border: 1px solid rgba(var(--color-foreground), .3);
-}
-.dr-card__colours { font-size: 1.2rem; opacity: .6; margin: 0; }
-
-/* ---- quick add ---- */
-/* .dr-card__title a::after covers the whole card to make it clickable, so every
-   control in here has to sit above it or the overlay eats the clicks. */
-.dr-quick { position: relative; z-index: 2; margin-top: 1.2rem; }
-.dr-quick__disclosure > summary { list-style: none; cursor: pointer; }
-.dr-quick__disclosure > summary::-webkit-details-marker { display: none; }
-.dr-quick__summary {
-  display: inline-block;
-  font-size: 1.2rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  border-bottom: 1px solid currentColor;
-  padding-bottom: .2rem;
-}
-.dr-quick__summary:hover { opacity: .65; }
-.dr-quick__sizes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
-  justify-content: center;
-  border: 0;
-  margin: 1.2rem 0 0;
-  padding: 0;
-  min-width: 0;
-}
-/* The input is stretched over its label and left transparent rather than shrunk to
-   a 1px box: a zero-size control cannot receive focus, and browsers refuse to show
-   the `required` validation bubble on one, reporting an unfocusable form control
-   instead. */
-.dr-quick__size { position: relative; display: inline-flex; }
-.dr-quick__size input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-.dr-quick__size label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 4rem;
-  min-height: 4.4rem;
-  padding: .6rem 1rem;
-  border: 1px solid rgba(var(--color-foreground), .25);
-  font-size: 1.3rem;
-  transition: border-color .2s ease, background-color .2s ease, color .2s ease;
-}
-.dr-quick__size input:hover + label { border-color: rgb(var(--color-foreground)); }
-.dr-quick__size input:checked + label {
-  background: rgb(var(--color-foreground));
-  color: rgb(var(--color-background));
-  border-color: rgb(var(--color-foreground));
-}
-.dr-quick__size input:focus-visible + label {
-  outline: 2px solid rgb(var(--color-foreground));
-  outline-offset: 2px;
-}
-.dr-quick__size input:disabled { cursor: default; }
-.dr-quick__size input:disabled + label {
-  opacity: .4;
-  text-decoration: line-through;
-  text-decoration-thickness: 1px;
-}
-.dr-quick__add { width: 100%; margin-top: 1.2rem; min-height: 4.4rem; padding: 1rem 2rem; }
-@media (prefers-reduced-motion: reduce) {
-  .dr-quick__size label { transition-duration: .01ms !important; }
-}
-
 /* ---- rail ---- */
 .dr-rail { position: relative; }
 .dr-rail__track {
@@ -310,11 +190,21 @@
 [dir='rtl'] .dr-rail__nav--prev svg { transform: none; }
 [dir='rtl'] .dr-rail__nav--next svg { transform: rotate(180deg); }
 
-/* ---- grid ---- */
-.dr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.6rem; }
-@media screen and (min-width: 750px) { .dr-grid { gap: 2rem; } }
+/* ---- grid ----
+   Row and column gaps are deliberately different. A fashion grid needs the columns
+   close together so the photography reads as one surface, and the rows far enough
+   apart that the caption under one garment is never mistaken for the one below it. */
+.dr-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--dr-cols-mobile, 2), minmax(0, 1fr));
+  column-gap: 1.1rem;
+  row-gap: 3rem;
+}
+@media screen and (min-width: 750px) {
+  .dr-grid { grid-template-columns: repeat(var(--dr-cols-tablet, 3), minmax(0, 1fr)); column-gap: 1.6rem; row-gap: 3.6rem; }
+}
 @media screen and (min-width: 990px) {
-  .dr-grid { grid-template-columns: repeat(var(--dr-cols, 4), minmax(0, 1fr)); }
+  .dr-grid { grid-template-columns: repeat(var(--dr-cols, 4), minmax(0, 1fr)); column-gap: 2.4rem; row-gap: 4.8rem; }
 }
 
 /* ---- editorial trio ---- */
@@ -341,5 +231,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dr-card__media img, .dr-trio__media img, .dr-btn, .dr-rail__track { transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  .dr-trio__media img, .dr-btn, .dr-rail__track { transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
