@@ -133,6 +133,10 @@
         querySelector, which only looks at descendants.
       {%- endcomment -%}
       <div class="dr-quick">
+        {%- comment -%}
+          Each button carries a .loading__spinner because Dawn's submit handler
+          dereferences it unconditionally after calling preventDefault.
+        {%- endcomment -%}
         <product-form class="product-form" data-hide-errors="false">
           {%- form 'product', p, id: quick_id, class: 'dr-quick__form', data-type: 'add-to-cart-form' -%}
             <div class="product-form__error-message-wrapper" role="alert" hidden>
@@ -143,6 +147,11 @@
               <input type="hidden" name="id" value="{{ p.variants.first.id }}">
               <button type="submit" name="add" class="dr-btn dr-btn--solid dr-quick__add">
                 <span>{{ 'products.product.add_to_cart' | t }}</span>
+                <div class="loading__spinner hidden">
+                  <svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                  </svg>
+                </div>
               </button>
             {%- else -%}
               <details class="dr-quick__disclosure">
@@ -169,6 +178,11 @@
 
                 <button type="submit" name="add" class="dr-btn dr-btn--solid dr-quick__add">
                   <span>{{ 'products.product.add_to_cart' | t }}</span>
+                  <div class="loading__spinner hidden">
+                    <svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                      <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                    </svg>
+                  </div>
                 </button>
               </details>
             {%- endif -%}

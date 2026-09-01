@@ -188,6 +188,17 @@
                   {{ 'products.product.sold_out' | t }}
                 {%- endif -%}
               </span>
+              {%- comment -%}
+                Required, not decoration: Dawn's onSubmitHandler calls
+                preventDefault and then querySelector('.loading__spinner').classList.
+                With no such node it throws after the default was already
+                suppressed, so the form neither submits nor adds anything.
+              {%- endcomment -%}
+              <div class="loading__spinner hidden">
+                <svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                  <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                </svg>
+              </div>
             </button>
 
             {%- if s.show_dynamic_checkout -%}
