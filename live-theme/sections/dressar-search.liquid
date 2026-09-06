@@ -8,6 +8,16 @@
   assign s = section.settings
 -%}
 
+{%- if s.quick_add -%}
+  {{ 'dressar-quick-add.css' | asset_url | stylesheet_tag }}
+  {%- comment -%}
+    product-form.js has to be on this page, not in the fetched payload: a <script>
+    arriving through innerHTML never runs, so Dawn's element must already be defined.
+  {%- endcomment -%}
+  <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'dressar-quick-add.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
 <div
   class="dr-section color-{{ s.color_scheme }} gradient"
   style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px;"
@@ -93,6 +103,7 @@
                         show_second: s.show_secondary_image,
                         meta_source: s.meta_source,
                         index: forloop.index,
+                        quick_add: s.quick_add,
                         show_swatches: true,
                         swatch_limit: 4
                       %}
@@ -131,6 +142,16 @@
     {%- endpaginate -%}
   {%- endif -%}
 </div>
+
+{%- if s.quick_add -%}
+  {% render 'dressar-quick-add-sheet',
+    heading: s.quick_add_heading,
+    add_label: s.quick_add_label,
+    error_message: s.quick_add_error,
+    close_label: s.quick_add_close,
+    dialog_label: s.quick_add_dialog
+  %}
+{%- endif -%}
 
 {% stylesheet %}
 .dr-search__head { text-align: center; margin-bottom: 3.2rem; }
@@ -191,6 +212,13 @@
       ]
     },
     { "type": "checkbox", "id": "show_secondary_image", "label": "Second image on hover", "default": true },
+    { "type": "header", "content": "Quick add" },
+    { "type": "checkbox", "id": "quick_add", "label": "Quick add", "default": true },
+    { "type": "text", "id": "quick_add_heading", "label": "Label above the sizes", "default": "Select size" },
+    { "type": "text", "id": "quick_add_label", "label": "Add button wording", "default": "Add to bag" },
+    { "type": "text", "id": "quick_add_error", "label": "Message when no size is chosen", "default": "Please select a size." },
+    { "type": "text", "id": "quick_add_close", "label": "Close control label", "default": "Close" },
+    { "type": "text", "id": "quick_add_dialog", "label": "Sheet label", "default": "Quick add" },
     {
       "type": "select", "id": "meta_source", "label": "Line above the title", "default": "type",
       "options": [

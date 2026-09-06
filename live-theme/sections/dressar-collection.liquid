@@ -21,6 +21,17 @@
   assign s = section.settings
 -%}
 
+{%- if s.quick_add -%}
+  {{ 'dressar-quick-add.css' | asset_url | stylesheet_tag }}
+  {%- comment -%}
+    Dawn's product-form.js must be present on THIS page, not in the fetched markup:
+    a <script> arriving through innerHTML never executes, so the custom element has
+    to already be defined when the quick-add payload is injected.
+  {%- endcomment -%}
+  <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'dressar-quick-add.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
 <collection-component
   view-event-payload="{{ collection | standard_event_data: 'view' | escape }}"
   data-collection-id="{{ collection.id }}"
@@ -106,6 +117,20 @@
   </div>
 </collection-component>
 
+{%- if s.quick_add -%}
+  {%- comment -%}
+    One sheet for the whole page, outside #ProductGridContainer so that filtering —
+    which replaces that container wholesale — cannot tear it out mid-interaction.
+  {%- endcomment -%}
+  {% render 'dressar-quick-add-sheet',
+    heading: s.quick_add_heading,
+    add_label: s.quick_add_label,
+    error_message: s.quick_add_error,
+    close_label: s.quick_add_close,
+    dialog_label: s.quick_add_dialog
+  %}
+{%- endif -%}
+
 {% stylesheet %}
 /* Padding and columns both come from dressar-sections.css now. They used to be
    repeated here, which meant the section stylesheet and the linked asset set the
@@ -161,7 +186,13 @@
     { "type": "checkbox", "id": "show_discount", "label": "Show discount percentage", "default": false },
     { "type": "checkbox", "id": "show_wishlist", "label": "Show save control", "info": "Requires a wishlist app. On its own the control stores nothing, so leave it off until an app is installed.", "default": false },
     { "type": "text", "id": "wishlist_label", "label": "Save control label", "default": "Save" },
-    { "type": "checkbox", "id": "quick_add", "label": "Quick add", "info": "Adds a size picker to each card so shoppers can add to the bag without leaving the grid.", "default": true },
+    { "type": "header", "content": "Quick add" },
+    { "type": "checkbox", "id": "quick_add", "label": "Quick add", "info": "Shows a “+” on each card that opens a size picker, so shoppers can add to the bag without leaving the grid.", "default": true },
+    { "type": "text", "id": "quick_add_heading", "label": "Label above the sizes", "default": "Select size" },
+    { "type": "text", "id": "quick_add_label", "label": "Add button wording", "default": "Add to bag" },
+    { "type": "text", "id": "quick_add_error", "label": "Message when no size is chosen", "default": "Please select a size." },
+    { "type": "text", "id": "quick_add_close", "label": "Close control label", "info": "Read out by screen readers.", "default": "Close" },
+    { "type": "text", "id": "quick_add_dialog", "label": "Sheet label", "info": "Read out by screen readers when the sheet opens.", "default": "Quick add" },
     {
       "type": "select", "id": "meta_source", "label": "Line above the title", "default": "type",
       "options": [

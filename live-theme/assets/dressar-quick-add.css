@@ -1,0 +1,143 @@
+/* Quick add sheet.
+   A bottom sheet on a phone, a small centred dialog from tablet up. */
+
+.dr-sheet { position: fixed; inset: 0; z-index: 60; }
+.dr-sheet[hidden] { display: none; }
+/* Locking the page behind the sheet stops the grid scrolling under a shopper's thumb
+   while they pick a size. */
+.dr-sheet-open { overflow: hidden; }
+
+.dr-sheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .38);
+  animation: dr-sheet-fade .2s ease;
+}
+
+.dr-sheet__panel {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 2.4rem 2rem calc(2.4rem + env(safe-area-inset-bottom));
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+  animation: dr-sheet-rise .24s ease;
+}
+.dr-sheet__panel:focus { outline: none; }
+
+@media screen and (min-width: 750px) {
+  .dr-sheet__panel {
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    width: min(42rem, calc(100vw - 4rem));
+    max-height: 80vh;
+    padding: 3.2rem;
+    animation: dr-sheet-fade .2s ease;
+  }
+}
+
+.dr-sheet__close {
+  position: absolute;
+  top: .8rem;
+  inset-inline-end: .8rem;
+  width: 4.4rem;
+  height: 4.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.dr-sheet__close svg { width: 1.8rem; height: 1.8rem; }
+
+.dr-sheet__error {
+  margin: 1.2rem 0 0;
+  font-size: 1.3rem;
+  color: rgb(var(--dr-status, 164, 69, 58));
+}
+
+@keyframes dr-sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dr-sheet-rise { from { transform: translateY(100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .dr-sheet__scrim, .dr-sheet__panel { animation: none; }
+}
+
+/* ---- fetched payload ---- */
+.dr-qa__head { padding-inline-end: 4rem; }
+.dr-qa__title { margin: 0; font-size: 1.6rem; font-weight: 500; }
+.dr-qa__title a { color: inherit; text-decoration: none; }
+.dr-qa__title a:hover { text-decoration: underline; text-underline-offset: .3rem; }
+.dr-qa .dr-card__colour { margin: .4rem 0 0; font-size: 1.3rem; opacity: .6; }
+.dr-qa__price { margin: .6rem 0 0; font-size: 1.5rem; display: flex; gap: .8rem; align-items: baseline; }
+.dr-qa__price-was { font-size: 1.3rem; opacity: .45; }
+
+.dr-qa__label {
+  margin: 2.4rem 0 1rem;
+  font-size: 1.2rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .7;
+}
+
+.dr-qa__sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .8rem;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.dr-qa__size { position: relative; display: inline-flex; }
+/* The input is stretched over its label and left transparent rather than shrunk to a
+   1px box. A zero-size control cannot receive focus, and browsers then refuse to
+   report it, so keyboard users lose the control entirely. */
+.dr-qa__size input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.dr-qa__size label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.6rem;
+  min-height: 4.4rem;
+  padding: 0 1.4rem;
+  font-size: 1.3rem;
+  letter-spacing: .06em;
+  border: 1px solid rgba(var(--color-foreground), .28);
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.dr-qa__size input:checked + label {
+  border-color: rgb(var(--color-foreground));
+  background: rgba(var(--color-foreground), .06);
+}
+.dr-qa__size input:focus-visible + label {
+  outline: 2px solid rgb(var(--color-foreground));
+  outline-offset: 2px;
+}
+/* Sold-out sizes stay on screen. They are struck through as well as dimmed, because
+   reduced opacity alone is not a difference a colour-blind shopper can rely on. */
+.dr-qa__size input:disabled { cursor: default; }
+.dr-qa__size input:disabled + label {
+  opacity: .4;
+  cursor: default;
+  text-decoration: line-through;
+}
+.dr-qa__sizes.is-invalid label { border-color: rgb(var(--dr-status, 164, 69, 58)); }
+
+.dr-qa__add { width: 100%; margin-top: 2rem; min-height: 5.4rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dr-qa__size label { transition-duration: .01ms !important; }
+}

@@ -1,0 +1,50 @@
+{%- comment -%}
+  The quick-add sheet shell. Rendered once per page by any section that switches
+  quick add on; the product-specific contents are fetched into it on demand.
+
+  Every shopper-facing word lives here rather than in the fetched section, because
+  that section is never placed on a template and would therefore only ever see its
+  own schema defaults. Here they are ordinary section settings the merchant can edit.
+
+  Accepts:
+    - heading:       label above the size grid, e.g. "Select size"
+    - add_label:     button wording, e.g. "Add to bag"
+    - error_message: shown when Add is pressed with no size chosen
+    - close_label:   accessible name for the close control
+    - dialog_label:  accessible name for the dialog itself
+{%- endcomment -%}
+
+<div
+  class="dr-sheet"
+  data-dr-sheet
+  data-label-size="{{ heading | default: 'Select size' | escape }}"
+  data-label-add="{{ add_label | default: 'Add to bag' | escape }}"
+  data-label-error="{{ error_message | default: 'Please select a size.' | escape }}"
+  hidden
+>
+  <div class="dr-sheet__scrim" data-dr-sheet-close></div>
+
+  <div
+    class="dr-sheet__panel"
+    role="dialog"
+    aria-modal="true"
+    aria-label="{{ dialog_label | default: 'Quick add' | escape }}"
+    tabindex="-1"
+    data-dr-sheet-panel
+  >
+    <button
+      type="button"
+      class="dr-sheet__close"
+      data-dr-sheet-close
+      aria-label="{{ close_label | default: 'Close' | escape }}"
+    >
+      <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" stroke-width="1.4" fill="none"/>
+      </svg>
+    </button>
+
+    <div class="dr-sheet__body" data-dr-sheet-body></div>
+
+    <p class="dr-sheet__error" data-dr-sheet-error role="alert" hidden></p>
+  </div>
+</div>

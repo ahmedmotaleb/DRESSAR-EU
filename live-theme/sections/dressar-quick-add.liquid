@@ -1,0 +1,144 @@
+{%- comment -%}
+  Quick add payload.
+
+  This section is never placed on a template. It is fetched on demand through the
+  Section Rendering API — /products/<handle>?section_id=dressar-quick-add — when a
+  shopper taps the "+" on a card, and injected into the sheet that already exists on
+  the page. That is why nothing here is dumped into the grid: a collection of
+  twenty-four products ships no variant JSON at all, and this markup is built only
+  for the one product someone actually asked about.
+
+  It deliberately contains Dawn's own <product-form> around a real {% form 'product' %}.
+  Dawn's element then performs the add, renders the cart sections and opens the cart
+  drawer, so there is no bespoke cart code anywhere in this feature.
+
+  Two things here are load-bearing and easy to break:
+
+  1. <product-form> must WRAP the form. Dawn's element runs
+     `this.form = this.querySelector('form')`, a descendant lookup, and dereferences
+     it immediately. With the form as an ancestor that is null and the element throws
+     on connect, losing the add and the drawer.
+
+  2. The button must contain .loading__spinner. Dawn's onSubmitHandler calls
+     preventDefault() and then querySelector('.loading__spinner').classList — with no
+     such node it throws after the default was already suppressed, so the form neither
+     submits nor adds anything.
+
+  The button label is left as Dawn's own add-to-cart string and overwritten by the
+  sheet after injection, so the wording stays a merchant setting on the section that
+  owns the sheet rather than being frozen here. This section is rendered outside any
+  template, so its own schema settings would only ever be their defaults.
+{%- endcomment -%}
+
+{%- liquid
+  assign p = product
+  assign form_id = 'DressarQuickAdd-' | append: p.id
+
+  assign title = p.metafields.custom.display_title.value | default: p.title
+
+  comment
+    "Add immediately" applies only when the product has no choice to make. A product
+    with five sizes where one happens to be in stock still opens the picker: silently
+    adding the last size left is not the shopper's decision, and the brief is explicit
+    that a size is never chosen for them.
+  endcomment
+  assign single = false
+  if p.variants.size == 1
+    assign single = true
+  endif
+
+  assign on_sale = false
+  if p.compare_at_price > p.price
+    assign on_sale = true
+  endif
+-%}
+
+<div
+  class="dr-qa"
+  data-dr-qa-payload
+  data-single="{% if single %}true{% else %}false{% endif %}"
+  data-product-url="{{ p.url }}"
+>
+  <div class="dr-qa__head">
+    <p class="dr-qa__title">
+      <a href="{{ p.url }}">{{ title }}</a>
+    </p>
+    {% render 'dressar-colours', product: p, output: 'label' %}
+    <p class="dr-qa__price">
+      {%- if on_sale -%}
+        <span class="dr-qa__price-now">{{ p.price | money }}</span>
+        <s class="dr-qa__price-was">{{ p.compare_at_price | money }}</s>
+      {%- else -%}
+        <span class="dr-qa__price-now">{{ p.price | money }}</span>
+      {%- endif -%}
+    </p>
+  </div>
+
+  <product-form class="product-form" data-hide-errors="false">
+    {%- form 'product',
+      p,
+      id: form_id,
+      class: 'dr-qa__form',
+      novalidate: 'novalidate',
+      data-type: 'add-to-cart-form'
+    -%}
+      <div class="product-form__error-message-wrapper" role="alert" hidden>
+        <span class="product-form__error-message"></span>
+      </div>
+
+      {%- if single -%}
+        <input type="hidden" name="id" value="{{ p.variants.first.id }}">
+      {%- else -%}
+        {%- comment -%}
+          Values are rendered in Shopify's own option order, which the merchant sets in
+          admin — M, L, XL, 2XL, 3XL here. They are NOT re-sorted against a hardcoded
+          size ladder: that would mangle anything the ladder does not know, such as
+          numeric EU sizing or "One size".
+        {%- endcomment -%}
+        <fieldset class="dr-qa__sizes" data-dr-qa-sizes>
+          <legend class="visually-hidden">
+            {{ 'products.product.choose_product_options' | t: product_name: title }}
+          </legend>
+          {%- for variant in p.variants -%}
+            <span class="dr-qa__size">
+              {%- comment -%}
+                Unavailable sizes stay on screen and are disabled, never hidden: a
+                shopper needs to know the size exists and is gone, not be left
+                wondering whether it is ever made.
+              {%- endcomment -%}
+              <input
+                type="radio"
+                name="id"
+                value="{{ variant.id }}"
+                id="{{ form_id }}-{{ variant.id }}"
+                {% unless variant.available %}disabled{% endunless %}
+              >
+              <label for="{{ form_id }}-{{ variant.id }}">{{ variant.title }}</label>
+            </span>
+          {%- endfor -%}
+        </fieldset>
+      {%- endif -%}
+
+      <button
+        type="submit"
+        name="add"
+        class="dr-btn dr-btn--solid dr-qa__add"
+        data-dr-qa-add
+      >
+        <span data-dr-qa-add-label>{{ 'products.product.add_to_cart' | t }}</span>
+        <div class="loading__spinner hidden">
+          <svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+            <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+          </svg>
+        </div>
+      </button>
+    {%- endform -%}
+  </product-form>
+</div>
+
+{% schema %}
+{
+  "name": "Quick add payload",
+  "settings": []
+}
+{% endschema %}
