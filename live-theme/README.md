@@ -10,6 +10,36 @@ Shopify is the source of truth. Every file here was verified byte-identical to
 the live theme by MD5 at the time of commit. When you change one, upload it with
 `themeFilesUpsert` and check the returned `checksumMd5` against the local file.
 
+## PENDING UPLOAD — read this first
+
+Phase B (commit `8577fc6`) is committed here but **has not been uploaded to the
+theme**: the Shopify connector needed reauthorising mid-session and could not be
+restored inside a running remote session. Before anything else, upload these six
+files with `themeFilesUpsert` and check each returned `checksumMd5` against the
+local file:
+
+| File | Bytes | MD5 |
+| --- | --- | --- |
+| `sections/dressar-quick-add.liquid` | 5505 | `035a6aeabb1a0619190f6ab92ada7a90` |
+| `snippets/dressar-quick-add-sheet.liquid` | 1787 | `6e2213fb149abfc3a8ead905375d6027` |
+| `assets/dressar-quick-add.css` | 4152 | `c14526e302ae3685c60d04ab87f7b998` |
+| `assets/dressar-quick-add.js` | 8509 | `e2bdca20a72aa7c3595d0520493ef71e` |
+| `sections/dressar-collection.liquid` | 10719 | `e9605faa8cf17a578cf01b46f32ad6d5` |
+| `sections/dressar-search.liquid` | 10196 | `28055f4f1be28e0a1a008abb11f80409` |
+
+Everything from Phase A (commit `02d269d`) is already live and verified.
+
+**Check the connected store first.** It has drifted twice to the Egyptian store
+`dnx31m-mi` / `dressar.co` (EGP). The correct one is `ntizm6-fs` / dressar.eu
+(EUR, Ireland). Theme `155562213544` exists only on the EU store, so a write
+aimed at the wrong shop fails rather than landing somewhere it should not — but
+confirm with `get-shop-info` before touching anything.
+
+Still to build: Phase C (collection toolbar, grid density, editorial inserts),
+D (restyle Dawn's filter drawer), E (product detail page), F (recommendations,
+complete the look, recently viewed), G (Product Family and Size Chart
+metaobjects, remaining metafield definitions).
+
 ## Why a retrofit rather than a new theme
 
 The repository root holds an earlier standalone theme. It was superseded: the
