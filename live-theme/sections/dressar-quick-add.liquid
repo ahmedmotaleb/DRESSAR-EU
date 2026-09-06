@@ -8,7 +8,10 @@
   twenty-four products ships no variant JSON at all, and this markup is built only
   for the one product someone actually asked about.
 
-  It deliberately contains Dawn's own <product-form> around a real {% form 'product' %}.
+  It deliberately contains Dawn's own <product-form> wrapped around a real product
+  form. (Written without the tag delimiters on purpose: Shopify parses Liquid inside
+  a comment even though it does not execute it, so an unclosed block tag in here is
+  a syntax error that takes the whole section down.)
   Dawn's element then performs the add, renders the cart sections and opens the cart
   drawer, so there is no bespoke cart code anywhere in this feature.
 
