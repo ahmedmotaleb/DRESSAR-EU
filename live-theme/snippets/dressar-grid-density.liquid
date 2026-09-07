@@ -1,0 +1,47 @@
+{%- comment -%}
+  Grid density control.
+
+  Sits in the collection toolbar and changes how many products fit across. The
+  choice is remembered per browser in localStorage — no account, no cookie banner
+  implications, and nothing leaves the device.
+
+  Two sets are rendered and CSS shows the one that applies: 3/4/5 from the desktop
+  breakpoint, 1/2 below it. Rendering both rather than branching in JavaScript keeps
+  the control correct when the window is resized across the breakpoint.
+
+  The buttons are drawn from spans rather than icon files so the glyph always has
+  exactly as many bars as the layout it selects.
+
+  Accepts:
+    - label:    accessible name for the group
+    - desktop:  merchant default for wide screens
+    - mobile:   merchant default for small screens
+{%- endcomment -%}
+
+<div class="dr-density" data-dr-density role="group" aria-label="{{ label | default: 'Grid view' | escape }}">
+  {%- for n in (3..5) -%}
+    <button
+      type="button"
+      class="dr-density__btn dr-density__btn--wide"
+      data-dr-density-set="{{ n }}"
+      data-scope="desktop"
+      aria-pressed="{% if n == desktop %}true{% else %}false{% endif %}"
+    >
+      <span class="visually-hidden">{{ n }}</span>
+      {%- for i in (1..n) -%}<span class="dr-density__bar" aria-hidden="true"></span>{%- endfor -%}
+    </button>
+  {%- endfor -%}
+
+  {%- for n in (1..2) -%}
+    <button
+      type="button"
+      class="dr-density__btn dr-density__btn--narrow"
+      data-dr-density-set="{{ n }}"
+      data-scope="mobile"
+      aria-pressed="{% if n == mobile %}true{% else %}false{% endif %}"
+    >
+      <span class="visually-hidden">{{ n }}</span>
+      {%- for i in (1..n) -%}<span class="dr-density__bar" aria-hidden="true"></span>{%- endfor -%}
+    </button>
+  {%- endfor -%}
+</div>

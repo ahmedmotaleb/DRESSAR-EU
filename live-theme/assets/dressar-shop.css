@@ -1,0 +1,185 @@
+/* Shopping-surface chrome: the collection toolbar, the grid density control and the
+   editorial cards that sit inside the product grid.
+
+   Dawn's facets markup is reused as-is — this file only lays it out and restyles it.
+   Nothing here renames or moves an id or class that facets.js reads, so filtering,
+   sorting, history and the Shopify analytics events are untouched. */
+
+/* ---- toolbar ----
+   The filter button, the sort select and the product count are all Dawn's, and they
+   arrive in an order chosen for tab sequence rather than for looks. Rather than
+   rewrite the snippet, the wrapper it produces is taken out of the layout with
+   `display: contents` so its children become items of one flex row here, and each is
+   given an explicit order. It is a presentational div with no semantics of its own,
+   and facets.js only ever reads its data attributes, never its box. */
+.dr-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 1.6rem; }
+.dr-toolbar .facets-container { display: contents; }
+
+/* Count first and hard left; everything else is pushed to the right as one group. */
+.dr-toolbar .product-count { order: 1; margin: 0; }
+.dr-toolbar .product-count__text {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .65;
+}
+.dr-toolbar .mobile-facets__wrapper { order: 2; margin-inline-start: auto; }
+.dr-toolbar .facets.small-hide { order: 3; }
+.dr-toolbar .dr-density { order: 4; }
+/* Active filters run full width underneath rather than squeezing the row. */
+.dr-toolbar .active-facets,
+.dr-toolbar #FacetFiltersPillsForm { order: 5; flex-basis: 100%; margin: 0; }
+
+/* The filter control is Dawn's <summary>; it is restyled, never replaced, because
+   <details>/<summary> is what opens the drawer without any script. */
+.dr-toolbar .mobile-facets__open-wrapper { list-style: none; }
+.dr-toolbar .mobile-facets__open {
+  display: inline-flex;
+  align-items: center;
+  gap: .8rem;
+  min-height: 4.4rem;
+  padding: 0 .4rem;
+  font-size: 1.2rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.dr-toolbar .mobile-facets__open .svg-wrapper { width: 1.6rem; height: 1.6rem; }
+
+.dr-toolbar .facet-filters { display: flex; align-items: center; gap: .8rem; padding: 0; }
+.dr-toolbar .facet-filters__label {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .65;
+}
+.dr-toolbar .facet-filters__sort {
+  border: 0;
+  background: transparent;
+  font-size: 1.2rem;
+  letter-spacing: .06em;
+  padding-inline: .4rem 2rem;
+  min-height: 4.4rem;
+}
+
+/* Chips: a hairline rectangle and a cross. No pills. */
+.dr-toolbar .active-facets__button-inner {
+  border: 1px solid rgba(var(--color-foreground), .28);
+  border-radius: 0;
+  background: transparent;
+  min-height: 3.4rem;
+  padding: 0 1rem;
+  font-size: 1.15rem;
+  letter-spacing: .04em;
+  text-transform: none;
+}
+.dr-toolbar .active-facets__button-remove { font-size: 1.15rem; }
+
+/* Sticky sits directly under the header, which is itself sticky at z-index 40. */
+.dr-toolbar--sticky {
+  position: sticky;
+  top: var(--dr-header-height, 0px);
+  z-index: 30;
+  background: rgb(var(--color-background));
+  padding-block: 1.2rem;
+}
+
+/* ---- density ---- */
+.dr-density { display: flex; align-items: center; gap: .4rem; }
+.dr-density__btn {
+  display: none;
+  align-items: flex-end;
+  gap: 2px;
+  width: 3.4rem;
+  height: 4.4rem;
+  padding: 0 .5rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: .35;
+}
+.dr-density__btn[aria-pressed='true'] { opacity: 1; }
+.dr-density__btn:hover { opacity: .7; }
+.dr-density__btn[aria-pressed='true']:hover { opacity: 1; }
+.dr-density__bar { flex: 1; height: 1.4rem; background: currentColor; }
+@media screen and (max-width: 989px) {
+  .dr-density__btn--narrow { display: flex; }
+}
+@media screen and (min-width: 990px) {
+  .dr-density__btn--wide { display: flex; }
+}
+
+/* ---- editorial insert ---- */
+/* A campaign card placed between rows of products. It is a grid item like any card,
+   so it flows with the grid instead of interrupting it. */
+.dr-editorial { position: relative; display: flex; flex-direction: column; min-width: 0; }
+.dr-editorial__media { display: block; overflow: hidden; background: rgba(var(--color-foreground), .04); }
+.dr-editorial__media img { width: 100%; height: 100%; object-fit: cover; }
+.dr-editorial__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .8rem;
+  padding: 2rem 0 0;
+}
+.dr-editorial__eyebrow {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  opacity: .62;
+}
+.dr-editorial__title {
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: clamp(1.8rem, 1.5rem + .9vw, 2.6rem);
+  line-height: 1.15;
+  margin: 0;
+  text-wrap: balance;
+}
+.dr-editorial__text { margin: 0; opacity: .72; }
+.dr-editorial__cta {
+  align-self: start;
+  margin-top: .4rem;
+  font-size: 1.2rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: .3rem;
+  color: inherit;
+}
+/* One link covering the card, so the whole tile is clickable without nesting a second
+   link inside it — the same approach the product card uses. */
+.dr-editorial__cta::after { content: ''; position: absolute; inset: 0; }
+
+/* On a phone an editorial card always takes the full width: at half a phone screen
+   the heading would wrap to five lines and read as a broken product card. */
+.dr-editorial { grid-column: 1 / -1; }
+.dr-editorial--one .dr-editorial__media { aspect-ratio: 3 / 4; }
+@media screen and (min-width: 750px) {
+  .dr-editorial--one { grid-column: span 1; }
+  .dr-editorial--two { grid-column: span 2; }
+  .dr-editorial--row { grid-column: 1 / -1; }
+  .dr-editorial--two .dr-editorial__media,
+  .dr-editorial--row .dr-editorial__media { aspect-ratio: 16 / 7; }
+}
+/* Overlaid text needs its own colour, set per block from the theme editor, because it
+   sits on a photograph rather than on the page background. */
+.dr-editorial--overlay { justify-content: center; }
+.dr-editorial--overlay .dr-editorial__body {
+  position: absolute;
+  inset: 0;
+  padding: clamp(1.6rem, 3vw, 4rem);
+  color: var(--dr-editorial-text, rgb(var(--color-background)));
+}
+.dr-editorial--overlay .dr-editorial__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, var(--dr-editorial-scrim, .2));
+}
+.dr-editorial--overlay .dr-editorial__media { position: relative; }

@@ -5,6 +5,33 @@
   var header = document.querySelector('[data-dressar-header]');
   if (!header) return;
 
+  /* ---- publish the header height ----
+     Anything that wants to stick underneath the header — the collection toolbar, for
+     one — needs to know how tall it is. Without this the toolbar sticks at top: 0 and
+     disappears behind the header, which sits above it on the z axis.
+
+     Only published when the header is genuinely sticky. The merchant can switch that
+     off, and in that case the header scrolls away and the toolbar should go all the
+     way to the top rather than leave a header-sized gap. The section emits the sticky
+     rule on its own #shopify-section wrapper, so that is what gets measured. */
+  var stickyBox = header.closest('.shopify-section') || header.parentElement;
+
+  function publishHeight() {
+    var isSticky = stickyBox && window.getComputedStyle(stickyBox).position === 'sticky';
+    var height = isSticky ? Math.round(header.getBoundingClientRect().height) : 0;
+    document.documentElement.style.setProperty('--dr-header-height', height + 'px');
+  }
+
+  publishHeight();
+  if ('ResizeObserver' in window) {
+    /* The header changes height when the logo image finally loads and when the window
+       crosses the breakpoint where the nav moves inline, so one measurement at load is
+       not enough. */
+    new ResizeObserver(publishHeight).observe(header);
+  } else {
+    window.addEventListener('resize', publishHeight);
+  }
+
   /* ---- solid-on-scroll ---- */
   if (header.classList.contains('dressar-header--overlay')) {
     /* Opting in from JS means a no-script visitor keeps a solid, readable header

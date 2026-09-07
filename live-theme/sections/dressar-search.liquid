@@ -1,6 +1,8 @@
 {{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
 {{ 'dressar-card.css' | asset_url | stylesheet_tag }}
+{{ 'dressar-shop.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'dressar-card.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'dressar-grid.js' | asset_url }}" defer="defer"></script>
 {{ 'component-facets.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
 
@@ -20,7 +22,8 @@
 
 <div
   class="dr-section color-{{ s.color_scheme }} gradient"
-  style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px;"
+  data-dr-grid-scope
+  style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px; --dr-cols: {{ s.columns_desktop }}; --dr-cols-tablet: {{ s.columns_tablet }}; --dr-cols-mobile: {{ s.columns_mobile }};"
 >
   <div class="dr-wrap dr-search__head">
     <h1 class="dr-head__title">
@@ -55,9 +58,13 @@
   {%- if search.performed -%}
     {%- paginate search.results by s.results_per_page -%}
       {%- if s.enable_filtering or s.enable_sorting -%}
+        {%- comment -%}
+          aria-labelledby pointed at #verticalTitle, which exists only in the sidebar
+          layout, so in drawer mode this landmark had no accessible name at all.
+        {%- endcomment -%}
         <aside
-          aria-labelledby="verticalTitle"
-          class="facets-wrapper page-width{% unless s.enable_filtering %} facets-wrapper--no-filters{% endunless %}"
+          aria-label="{{ s.toolbar_label | escape }}"
+          class="facets-wrapper dr-wrap dr-wrap--shop dr-toolbar{% if s.sticky_toolbar %} dr-toolbar--sticky{% endif %}{% unless s.enable_filtering %} facets-wrapper--no-filters{% endunless %}"
           id="main-collection-filters"
           data-id="{{ section.id }}"
         >
@@ -68,6 +75,14 @@
             filter_type: s.filter_type,
             paginate: paginate
           %}
+
+          {%- if s.show_density -%}
+            {% render 'dressar-grid-density',
+              label: s.density_label,
+              desktop: s.columns_desktop,
+              mobile: s.columns_mobile
+            %}
+          {%- endif -%}
         </aside>
       {%- endif -%}
 
@@ -91,7 +106,6 @@
               id="product-grid"
               data-id="{{ section.id }}"
               class="dr-wrap dr-wrap--shop dr-grid dr-grid--collection"
-              style="--dr-cols: {{ s.columns_desktop }}; --dr-cols-mobile: {{ s.columns_mobile }};"
             >
               {%- for item in search.results -%}
                 <li>
@@ -198,7 +212,8 @@
   "class": "section",
   "settings": [
     { "type": "range", "id": "results_per_page", "min": 8, "max": 36, "step": 4, "label": "Results per page", "default": 24 },
-    { "type": "range", "id": "columns_desktop", "min": 2, "max": 5, "step": 1, "label": "Columns on desktop", "default": 4 },
+    { "type": "range", "id": "columns_desktop", "min": 3, "max": 5, "step": 1, "label": "Columns on desktop", "default": 4 },
+    { "type": "range", "id": "columns_tablet", "min": 2, "max": 4, "step": 1, "label": "Columns on tablet", "default": 3 },
     {
       "type": "select", "id": "columns_mobile", "label": "Columns on mobile", "default": "2",
       "options": [{ "value": "1", "label": "One" }, { "value": "2", "label": "Two" }]
@@ -227,6 +242,11 @@
         { "value": "fabric", "label": "Fabric metafield" }
       ]
     },
+    { "type": "header", "content": "Toolbar" },
+    { "type": "text", "id": "toolbar_label", "label": "Toolbar label", "default": "Filter and sort" },
+    { "type": "checkbox", "id": "sticky_toolbar", "label": "Keep the toolbar in view when scrolling", "default": true },
+    { "type": "checkbox", "id": "show_density", "label": "Let shoppers change how many products fit across", "default": true },
+    { "type": "text", "id": "density_label", "label": "Grid control label", "default": "Grid view" },
     { "type": "checkbox", "id": "enable_filtering", "label": "Enable filtering", "default": true },
     {
       "type": "select", "id": "filter_type", "label": "Filter layout", "default": "drawer",

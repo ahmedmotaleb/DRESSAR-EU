@@ -9,6 +9,7 @@
 
 {{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
 {{ 'dressar-card.css' | asset_url | stylesheet_tag }}
+{{ 'dressar-shop.css' | asset_url | stylesheet_tag }}
 {{ 'component-facets.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
 {%- comment -%}
@@ -16,6 +17,7 @@
   would emit the same <link> twenty-four times in a full grid.
 {%- endcomment -%}
 <script src="{{ 'dressar-card.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'dressar-grid.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign s = section.settings
@@ -36,15 +38,29 @@
   view-event-payload="{{ collection | standard_event_data: 'view' | escape }}"
   data-collection-id="{{ collection.id }}"
 >
+  {%- comment -%}
+    The column counts live here, not on the <ul>. facets.js replaces
+    #ProductGridContainer wholesale on every filter change, so a custom property set
+    inside it would be discarded the first time anyone touched a filter — taking the
+    shopper's density choice with it. This wrapper survives, and custom properties
+    inherit down to the grid regardless.
+  {%- endcomment -%}
   <div
     class="dr-section color-{{ s.color_scheme }} gradient"
-    style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px;"
+    data-dr-grid-scope
+    style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px; --dr-cols: {{ s.columns_desktop }}; --dr-cols-tablet: {{ s.columns_tablet }}; --dr-cols-mobile: {{ s.columns_mobile }};"
   >
     {%- paginate collection.products by s.products_per_page -%}
       {%- if s.enable_filtering or s.enable_sorting -%}
+        {%- comment -%}
+          aria-labelledby used to point at #verticalTitle, which only exists in the
+          sidebar layout — in drawer mode it referenced nothing, leaving this landmark
+          with no accessible name at all. A dangling reference is worse than none,
+          because it looks correct in the markup.
+        {%- endcomment -%}
         <aside
-          aria-labelledby="verticalTitle"
-          class="facets-wrapper page-width{% unless s.enable_filtering %} facets-wrapper--no-filters{% endunless %}"
+          aria-label="{{ s.toolbar_label | escape }}"
+          class="facets-wrapper dr-wrap dr-wrap--shop dr-toolbar{% if s.sticky_toolbar %} dr-toolbar--sticky{% endif %}{% unless s.enable_filtering %} facets-wrapper--no-filters{% endunless %}"
           id="main-collection-filters"
           data-id="{{ section.id }}"
         >
@@ -55,6 +71,14 @@
             filter_type: s.filter_type,
             paginate: paginate
           %}
+
+          {%- if s.show_density -%}
+            {% render 'dressar-grid-density',
+              label: s.density_label,
+              desktop: s.columns_desktop,
+              mobile: s.columns_mobile
+            %}
+          {%- endif -%}
         </aside>
       {%- endif -%}
 
@@ -79,7 +103,6 @@
               id="product-grid"
               data-id="{{ section.id }}"
               class="dr-wrap dr-wrap--shop dr-grid dr-grid--collection"
-              style="--dr-cols: {{ s.columns_desktop }}; --dr-cols-tablet: {{ s.columns_tablet }}; --dr-cols-mobile: {{ s.columns_mobile }};"
             >
               {%- for product in collection.products -%}
                 {%- assign card_uid = section.id | append: '-' | append: forloop.index -%}
@@ -102,6 +125,67 @@
                     uid: card_uid
                   %}
                 </li>
+
+                {%- comment -%}
+                  Editorial cards are emitted from inside the product loop, so one can
+                  only appear if the grid actually reached that position. A filter that
+                  cuts the results to six products silently drops the card scheduled
+                  after the twelfth, instead of leaving it stranded at the end.
+                {%- endcomment -%}
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'editorial' and block.settings.after_product == forloop.parentloop.index -%}
+                    {%- liquid
+                      assign b = block.settings
+                      assign has_link = false
+                      if b.link != blank
+                        assign has_link = true
+                      endif
+                    -%}
+                    <li
+                      class="dr-editorial dr-editorial--{{ b.span }}{% if b.overlay %} dr-editorial--overlay{% endif %}"
+                      style="--dr-editorial-text: {{ b.text_colour }}; --dr-editorial-scrim: {{ b.scrim | divided_by: 100.0 }};"
+                      {{ block.shopify_attributes }}
+                    >
+                      <div class="dr-editorial__media">
+                        {%- if b.image -%}
+                          <img
+                            src="{{ b.image | image_url: width: 1400 }}"
+                            srcset="{{ b.image | image_url: width: 700 }} 700w, {{ b.image | image_url: width: 1400 }} 1400w"
+                            sizes="(min-width: 990px) 50vw, 100vw"
+                            alt="{{ b.image.alt | escape }}"
+                            width="{{ b.image.width }}"
+                            height="{{ b.image.height }}"
+                            loading="lazy"
+                          >
+                        {%- else -%}
+                          {{ 'lifestyle-1' | placeholder_svg_tag: '' }}
+                        {%- endif -%}
+                      </div>
+
+                      <div class="dr-editorial__body">
+                        {%- if b.eyebrow != blank -%}
+                          <p class="dr-editorial__eyebrow">{{ b.eyebrow }}</p>
+                        {%- endif -%}
+                        {%- if b.heading != blank -%}
+                          <h3 class="dr-editorial__title">{{ b.heading }}</h3>
+                        {%- endif -%}
+                        {%- if b.text != blank -%}
+                          <p class="dr-editorial__text">{{ b.text }}</p>
+                        {%- endif -%}
+                        {%- comment -%}
+                          Only a link when there is somewhere to go. An empty href
+                          resolves to the current page, so an unconfigured card would
+                          silently reload the collection and read as a broken site.
+                        {%- endcomment -%}
+                        {%- if b.cta != blank and has_link -%}
+                          <a class="dr-editorial__cta" href="{{ b.link }}">{{ b.cta }}</a>
+                        {%- elsif b.cta != blank -%}
+                          <span class="dr-editorial__cta">{{ b.cta }}</span>
+                        {%- endif -%}
+                      </div>
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
               {%- endfor -%}
             </ul>
 
@@ -201,6 +285,11 @@
         { "value": "fabric", "label": "Fabric metafield" }
       ]
     },
+    { "type": "header", "content": "Toolbar" },
+    { "type": "text", "id": "toolbar_label", "label": "Toolbar label", "info": "Read out by screen readers when they reach the filter and sort controls.", "default": "Filter and sort" },
+    { "type": "checkbox", "id": "sticky_toolbar", "label": "Keep the toolbar in view when scrolling", "default": true },
+    { "type": "checkbox", "id": "show_density", "label": "Let shoppers change how many products fit across", "info": "Remembered in the shopper's own browser. No account needed.", "default": true },
+    { "type": "text", "id": "density_label", "label": "Grid control label", "info": "Read out by screen readers.", "default": "Grid view" },
     { "type": "header", "content": "Filtering" },
     { "type": "checkbox", "id": "enable_filtering", "label": "Enable filtering", "info": "Filters come from the Search & Discovery app.", "default": true },
     {
@@ -216,6 +305,33 @@
     { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-1" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Top padding", "default": 24 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Bottom padding", "default": 56 }
+  ],
+  "blocks": [
+    {
+      "type": "editorial",
+      "name": "Editorial card",
+      "settings": [
+        { "type": "paragraph", "content": "Placed inside the grid, after the product position you choose. It only appears if the grid actually reaches that position, so filtering to fewer products hides it rather than stranding it at the end." },
+        { "type": "range", "id": "after_product", "min": 2, "max": 24, "step": 1, "label": "Show after product", "default": 8 },
+        {
+          "type": "select", "id": "span", "label": "Width", "default": "two",
+          "options": [
+            { "value": "one", "label": "One column" },
+            { "value": "two", "label": "Two columns" },
+            { "value": "row", "label": "Full row" }
+          ]
+        },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "New season" },
+        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "textarea", "id": "text", "label": "Text" },
+        { "type": "text", "id": "cta", "label": "Link label", "default": "Explore" },
+        { "type": "url", "id": "link", "label": "Link" },
+        { "type": "checkbox", "id": "overlay", "label": "Place the text over the image", "default": true },
+        { "type": "color", "id": "text_colour", "label": "Text colour when overlaid", "default": "#FFFFFF" },
+        { "type": "range", "id": "scrim", "min": 0, "max": 70, "step": 5, "unit": "%", "label": "Darken the image behind the text", "info": "Only used when the text is overlaid. Raise it until the words are comfortably readable.", "default": 20 }
+      ]
+    }
   ]
 }
 {% endschema %}
