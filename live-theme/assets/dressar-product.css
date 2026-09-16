@@ -15,7 +15,9 @@
 
 .dr-pdp { display: grid; gap: 3.2rem; }
 @media screen and (min-width: 990px) {
-  .dr-pdp { grid-template-columns: minmax(0, 6fr) minmax(0, 4fr); gap: 5.6rem; align-items: start; }
+  /* 62/38 rather than a even-ish split. The photography is what sells a garment, and
+     the information column only needs to hold a measured line of text. */
+  .dr-pdp { grid-template-columns: minmax(0, 62fr) minmax(0, 38fr); gap: 5.6rem; align-items: start; }
 }
 
 /* ---- gallery ---- */
@@ -205,4 +207,191 @@
     transition-duration: .01ms !important;
   }
   .dr-pdp__gallery { scroll-behavior: auto !important; }
+}
+
+/* ---- gallery counter and enlarge ---- */
+.dr-pdp__media { position: relative; }
+.dr-pdp__counter {
+  position: absolute;
+  bottom: 1.2rem;
+  inset-inline-end: 1.2rem;
+  z-index: 2;
+  margin: 0;
+  padding: .4rem .9rem;
+  font-size: 1.2rem;
+  letter-spacing: .06em;
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+}
+/* The editorial grid shows every image at once, so counting them says nothing. */
+@media screen and (min-width: 990px) { .dr-pdp__counter { display: none; } }
+
+/* A button rather than a click handler on the image, so the enlarge is reachable by
+   keyboard and announced as a control. It is styled away to nothing but its contents. */
+.dr-pdp__zoom {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+.dr-pdp__zoom:focus-visible { outline: 2px solid rgb(var(--color-foreground)); outline-offset: -2px; }
+
+.dr-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgb(var(--color-background));
+}
+.dr-zoom[hidden] { display: none; }
+.dr-zoom-open { overflow: hidden; }
+.dr-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.dr-zoom__close {
+  position: absolute;
+  top: 1.2rem;
+  inset-inline-end: 1.2rem;
+  width: 4.4rem;
+  height: 4.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.dr-zoom__close svg { width: 1.8rem; height: 1.8rem; }
+
+/* ---- colour row ---- */
+.dr-pdp__colours { margin: 0 0 2.4rem; }
+.dr-pdp__opt-label {
+  margin: 0 0 .6rem;
+  font-size: 1.2rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.dr-pdp__colours .dr-card__colour { margin: 0 0 1rem; font-size: 1.4rem; opacity: .7; }
+.dr-pdp__colours .dr-swatches { margin-top: 0; }
+/* Larger than on a card: there is room here and the colour is a real decision. */
+.dr-pdp__colours .dr-swatch { width: 3.4rem; height: 3.4rem; }
+.dr-pdp__colours .dr-swatch__chip { width: 2rem; height: 2rem; }
+
+/* ---- garment length ---- */
+/* Sits immediately under the size grid. For a maxi length this is the number that
+   decides the purchase, so it is given its own line rather than a row in a table. */
+.dr-pdp__length {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.6rem;
+  margin: 0 0 1.6rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(var(--color-foreground), .12);
+  font-size: 1.4rem;
+}
+.dr-pdp__length-label { opacity: .6; }
+
+/* ---- fit and details ---- */
+.dr-facts { margin: 0 0 2.8rem; }
+.dr-facts__heading {
+  font-size: 1.2rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin: 0 0 1.2rem;
+}
+.dr-facts__list { margin: 0; padding: 0; list-style: none; display: grid; gap: .5rem; font-size: 1.45rem; }
+.dr-facts__list li { opacity: .82; }
+.dr-facts__advice { margin: 1.2rem 0 0; font-size: 1.4rem; display: flex; gap: .8rem; }
+.dr-facts__key { opacity: .6; }
+.dr-facts__measures {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .5rem 1.6rem;
+  margin: 1.6rem 0 0;
+  font-size: 1.4rem;
+}
+.dr-facts__measures dt { opacity: .6; }
+.dr-facts__measures dd { margin: 0; }
+
+/* ---- size guide drawer ---- */
+.dr-guide { position: fixed; inset: 0; z-index: 75; }
+.dr-guide[hidden] { display: none; }
+.dr-guide-open { overflow: hidden; }
+.dr-guide__scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, .34); }
+.dr-guide__panel {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: min(52rem, 100%);
+  display: flex;
+  flex-direction: column;
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+}
+.dr-guide__panel:focus { outline: none; }
+.dr-guide__head {
+  position: relative;
+  padding: 2.4rem 2.4rem 1.6rem;
+  border-bottom: 1px solid rgba(var(--color-foreground), .12);
+}
+.dr-guide__title { margin: 0; font-size: 1.3rem; letter-spacing: .14em; text-transform: uppercase; }
+.dr-guide__applies { margin: .4rem 0 0; font-size: 1.3rem; opacity: .6; }
+.dr-guide__close {
+  position: absolute;
+  top: 1.4rem;
+  inset-inline-end: 1.2rem;
+  width: 4.4rem;
+  height: 4.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.dr-guide__close svg { width: 1.8rem; height: 1.8rem; }
+.dr-guide__body { flex: 1; overflow-y: auto; padding: 2.4rem; }
+.dr-guide__section { margin-bottom: 2.8rem; }
+.dr-guide__subhead {
+  font-size: 1.2rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .6;
+  margin: 0 0 1rem;
+}
+.dr-guide__units { display: inline-flex; margin-bottom: 2rem; }
+.dr-guide__units button {
+  min-height: 3.8rem;
+  padding: 0 1.6rem;
+  border: 1px solid rgba(var(--color-foreground), .28);
+  background: transparent;
+  color: inherit;
+  font-size: 1.2rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.dr-guide__units button + button { border-inline-start: 0; }
+.dr-guide__units button[aria-pressed='true'] { background: rgba(var(--color-foreground), .08); }
+/* Measurement tables run wide; they scroll rather than forcing the panel to. */
+.dr-guide__body table { width: 100%; border-collapse: collapse; font-size: 1.35rem; }
+.dr-guide__body th,
+.dr-guide__body td { padding: .8rem 1rem; border-bottom: 1px solid rgba(var(--color-foreground), .12); text-align: start; }
+.dr-guide__body .rte { overflow-x: auto; }
+
+/* The size guide trigger is a button, not a link — it opens a panel and goes nowhere. */
+button.dr-opt__guide {
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: .3rem;
 }

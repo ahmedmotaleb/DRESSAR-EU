@@ -1,0 +1,116 @@
+{%- comment -%}
+  Size guide drawer.
+
+  Reads a Size chart metaobject referenced from the product, so Dressar can keep a
+  different chart for dresses, skirts, trousers and outerwear without duplicating
+  one per product.
+
+  Centimetres and inches are separate fields on the metaobject rather than converted
+  in the browser. A converted number would be this theme's arithmetic rather than the
+  pattern cutter's measurement, and rounding drifts across a table. The unit toggle
+  therefore appears only when the merchant has actually supplied both, and picks the
+  set that exists otherwise.
+
+  Renders nothing at all when the product has no chart, and the section hides the
+  trigger in the same case — so there is never a link to an empty drawer.
+
+  Accepts:
+    - product
+    - trigger_label, close_label, cm_label, in_label
+    - how_label, body_label, garment_label, notes_label
+{%- endcomment -%}
+
+{%- liquid
+  assign chart = product.metafields.custom.size_chart.value
+  assign has_cm = false
+  assign has_in = false
+  if chart.body_measurements_cm != blank or chart.garment_measurements_cm != blank
+    assign has_cm = true
+  endif
+  if chart.body_measurements_in != blank or chart.garment_measurements_in != blank
+    assign has_in = true
+  endif
+-%}
+
+{%- if chart != blank -%}
+  <div class="dr-guide" data-dr-guide hidden>
+    <div class="dr-guide__scrim" data-dr-guide-close></div>
+
+    <div
+      class="dr-guide__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-label="{{ trigger_label | default: 'Size guide' | escape }}"
+      tabindex="-1"
+      data-dr-guide-panel
+    >
+      <div class="dr-guide__head">
+        <h2 class="dr-guide__title">{{ chart.name | default: trigger_label | default: 'Size guide' }}</h2>
+        {%- if chart.applies_to != blank -%}
+          <p class="dr-guide__applies">{{ chart.applies_to }}</p>
+        {%- endif -%}
+        <button
+          type="button"
+          class="dr-guide__close"
+          data-dr-guide-close
+          aria-label="{{ close_label | default: 'Close' | escape }}"
+        >
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" stroke-width="1.4" fill="none"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="dr-guide__body">
+        {%- comment -%}
+          Only offered when both unit sets exist. Showing a toggle that switches to an
+          empty table would be worse than showing no toggle at all.
+        {%- endcomment -%}
+        {%- if has_cm and has_in -%}
+          <div class="dr-guide__units" role="group" aria-label="{{ trigger_label | default: 'Size guide' | escape }}">
+            <button type="button" data-dr-guide-unit="cm" aria-pressed="true">{{ cm_label | default: 'cm' }}</button>
+            <button type="button" data-dr-guide-unit="in" aria-pressed="false">{{ in_label | default: 'in' }}</button>
+          </div>
+        {%- endif -%}
+
+        {%- if chart.how_to_measure != blank -%}
+          <section class="dr-guide__section">
+            <h3 class="dr-guide__subhead">{{ how_label | default: 'How to measure' }}</h3>
+            <div class="rte">{{ chart.how_to_measure | metafield_tag }}</div>
+          </section>
+        {%- endif -%}
+
+        {%- if chart.body_measurements_cm != blank or chart.body_measurements_in != blank -%}
+          <section class="dr-guide__section">
+            <h3 class="dr-guide__subhead">{{ body_label | default: 'Body measurements' }}</h3>
+            {%- if chart.body_measurements_cm != blank -%}
+              <div class="rte" data-dr-guide-table="cm">{{ chart.body_measurements_cm | metafield_tag }}</div>
+            {%- endif -%}
+            {%- if chart.body_measurements_in != blank -%}
+              <div class="rte" data-dr-guide-table="in"{% if has_cm %} hidden{% endif %}>{{ chart.body_measurements_in | metafield_tag }}</div>
+            {%- endif -%}
+          </section>
+        {%- endif -%}
+
+        {%- if chart.garment_measurements_cm != blank or chart.garment_measurements_in != blank -%}
+          <section class="dr-guide__section">
+            <h3 class="dr-guide__subhead">{{ garment_label | default: 'Garment measurements' }}</h3>
+            {%- if chart.garment_measurements_cm != blank -%}
+              <div class="rte" data-dr-guide-table="cm">{{ chart.garment_measurements_cm | metafield_tag }}</div>
+            {%- endif -%}
+            {%- if chart.garment_measurements_in != blank -%}
+              <div class="rte" data-dr-guide-table="in"{% if has_cm %} hidden{% endif %}>{{ chart.garment_measurements_in | metafield_tag }}</div>
+            {%- endif -%}
+          </section>
+        {%- endif -%}
+
+        {%- if chart.fit_notes != blank -%}
+          <section class="dr-guide__section">
+            <h3 class="dr-guide__subhead">{{ notes_label | default: 'Fit notes' }}</h3>
+            <div class="rte">{{ chart.fit_notes | metafield_tag }}</div>
+          </section>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}

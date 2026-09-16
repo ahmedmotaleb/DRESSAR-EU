@@ -1,0 +1,124 @@
+{%- comment -%}
+  Fit and details.
+
+  The modest-fashion differentiator. Coverage questions — is it lined, is it opaque,
+  how long is it actually — are the ones that decide a purchase and the ones a
+  photograph answers worst. They are discrete metafields rather than one rich-text
+  block so they can be listed cleanly and so garment length can be lifted out and
+  shown next to the size selector.
+
+  Every line is conditional. A product with nothing filled renders nothing at all,
+  not an empty heading, and a garment with no pockets simply omits the line rather
+  than announcing their absence.
+
+  Accepts:
+    - product
+    - heading, length_label, model_label, model_wears_label, advice_label
+    - output: 'details' (default) | 'length'
+             'length' renders only the garment length, for placing beside the sizes.
+{%- endcomment -%}
+
+{%- liquid
+  assign out = output | default: 'details'
+  assign mf = product.metafields.custom
+
+  comment
+    A dimension metafield holds a number and a unit name like CENTIMETERS. Formatting
+    it here rather than through metafield_tag keeps the output a bare string that can
+    sit inside a sentence, instead of markup this layout would have to undo.
+  endcomment
+  assign length_text = ''
+  if mf.garment_length.value.value
+    assign unit = mf.garment_length.value.unit | downcase
+    assign unit = unit | replace: 'centimeters', 'cm' | replace: 'millimeters', 'mm' | replace: 'meters', 'm' | replace: 'inches', 'in' | replace: 'feet', 'ft' | replace: 'yards', 'yd'
+    assign length_text = mf.garment_length.value.value | append: ' ' | append: unit
+  endif
+
+  assign model_text = ''
+  if mf.model_height.value.value
+    assign munit = mf.model_height.value.unit | downcase
+    assign munit = munit | replace: 'centimeters', 'cm' | replace: 'millimeters', 'mm' | replace: 'meters', 'm' | replace: 'inches', 'in' | replace: 'feet', 'ft' | replace: 'yards', 'yd'
+    assign model_text = mf.model_height.value.value | append: ' ' | append: munit
+  endif
+-%}
+
+{%- if out == 'length' -%}
+  {%- if length_text != blank -%}
+    <p class="dr-pdp__length">
+      <span class="dr-pdp__length-label">{{ length_label | default: 'Garment length' }}</span>
+      <span class="dr-pdp__length-value">{{ length_text }}</span>
+    </p>
+  {%- endif -%}
+
+{%- else -%}
+  {%- liquid
+    assign traits = ''
+    if mf.fit != blank
+      assign traits = traits | append: mf.fit | append: '||'
+    endif
+    if mf.sleeve_length != blank
+      assign traits = traits | append: mf.sleeve_length | append: '||'
+    endif
+    if mf.lining != blank
+      assign traits = traits | append: mf.lining | append: '||'
+    endif
+    if mf.opacity != blank
+      assign traits = traits | append: mf.opacity | append: '||'
+    endif
+    if mf.waist_type != blank
+      assign traits = traits | append: mf.waist_type | append: '||'
+    endif
+    if mf.pockets != blank
+      assign traits = traits | append: mf.pockets | append: '||'
+    endif
+    if mf.closure != blank
+      assign traits = traits | append: mf.closure | append: '||'
+    endif
+    assign trait_list = traits | split: '||'
+
+    assign has_measurements = false
+    if length_text != blank or model_text != blank or mf.model_size != blank
+      assign has_measurements = true
+    endif
+  -%}
+
+  {%- if trait_list.size > 0 or has_measurements or mf.fit_scale != blank -%}
+    <div class="dr-facts">
+      {%- if heading != blank -%}
+        <h2 class="dr-facts__heading">{{ heading }}</h2>
+      {%- endif -%}
+
+      {%- if trait_list.size > 0 -%}
+        <ul class="dr-facts__list" role="list">
+          {%- for trait in trait_list -%}
+            <li>{{ trait }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if mf.fit_scale != blank -%}
+        <p class="dr-facts__advice">
+          <span class="dr-facts__key">{{ advice_label | default: 'Sizing' }}</span>
+          <span>{{ mf.fit_scale }}</span>
+        </p>
+      {%- endif -%}
+
+      {%- if has_measurements -%}
+        <dl class="dr-facts__measures">
+          {%- if length_text != blank -%}
+            <dt>{{ length_label | default: 'Garment length' }}</dt>
+            <dd>{{ length_text }}</dd>
+          {%- endif -%}
+          {%- if model_text != blank -%}
+            <dt>{{ model_label | default: 'Model' }}</dt>
+            <dd>{{ model_text }}</dd>
+          {%- endif -%}
+          {%- if mf.model_size != blank -%}
+            <dt>{{ model_wears_label | default: 'Model wears' }}</dt>
+            <dd>{{ mf.model_size }}</dd>
+          {%- endif -%}
+        </dl>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- endif -%}

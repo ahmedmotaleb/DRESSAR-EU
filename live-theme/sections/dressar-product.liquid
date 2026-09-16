@@ -5,7 +5,12 @@
 {%- endcomment -%}
 
 {{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+{{ 'dressar-card.css' | asset_url | stylesheet_tag }}
 {{ 'dressar-product.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  dressar-card.css is here for the colour swatches, which are the same component the
+  grid uses — the shopper should not meet two different swatch designs on one visit.
+{%- endcomment -%}
 <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'dressar-product.js' | asset_url }}" defer="defer"></script>
 
@@ -39,10 +44,27 @@
     {%- endif -%}
 
     <div class="dr-pdp">
-      <div class="dr-pdp__gallery dr-pdp__gallery--{{ s.gallery_layout }}" aria-label="{{ 'products.product.media.gallery_viewer' | t }}">
+      <div class="dr-pdp__media">
+      {%- comment -%}
+        The counter is only meaningful while the gallery is a swipeable strip, which is
+        the mobile layout; CSS hides it once the editorial grid shows every image at
+        once, where counting them would say nothing.
+      {%- endcomment -%}
+      {%- if product.media.size > 1 -%}
+        <p class="dr-pdp__counter" data-dr-counter aria-hidden="true">
+          <span data-dr-counter-now>1</span> / {{ product.media.size }}
+        </p>
+      {%- endif -%}
+      <div class="dr-pdp__gallery dr-pdp__gallery--{{ s.gallery_layout }}" data-dr-gallery aria-label="{{ 'products.product.media.gallery_viewer' | t }}">
         {%- for media in product.media -%}
-          <figure class="dr-pdp__figure" data-media-id="{{ media.id }}">
+          <figure class="dr-pdp__figure" data-media-id="{{ media.id }}" data-dr-figure>
             {%- if media.media_type == 'image' -%}
+              <button
+                type="button"
+                class="dr-pdp__zoom"
+                data-dr-zoom="{{ forloop.index0 }}"
+                aria-label="{{ 'products.product.media.open_media' | t: index: forloop.index }}"
+              >
               <img
                 src="{{ media | image_url: width: 1400 }}"
                 srcset="{{ media | image_url: width: 600 }} 600w, {{ media | image_url: width: 1000 }} 1000w, {{ media | image_url: width: 1400 }} 1400w"
@@ -52,6 +74,7 @@
                 height="{{ media.height }}"
                 {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
               >
+              </button>
             {%- else -%}
               {{ media | media_tag: image_size: '1400x', autoplay: false, loop: false, controls: true }}
             {%- endif -%}
@@ -59,6 +82,7 @@
         {%- else -%}
           <figure class="dr-pdp__figure">{{ 'product-1' | placeholder_svg_tag: '' }}</figure>
         {%- endfor -%}
+      </div>
       </div>
 
       <div class="dr-pdp__info">
@@ -90,6 +114,35 @@
             {{ 'products.product.shipping_policy_html' | t: link: shop.shipping_policy.url }}
           {%- endif -%}
         </p>
+
+        {%- if s.show_colours -%}
+          {%- comment -%}
+            The same colour component the grid uses, so a shopper meets one swatch
+            design across the whole store. It resolves native colour variants and
+            sibling products in a Product Family identically, and renders nothing when
+            the product has neither — which is every product here until families are
+            set up in admin.
+          {%- endcomment -%}
+          <div class="dr-pdp__colours">
+            <p class="dr-pdp__opt-label">
+              <span>{{ s.colour_label }}</span>
+            </p>
+            {% render 'dressar-colours',
+              product: product,
+              output: 'label',
+              colour_word: s.colour_word,
+              colour_label: s.colour_label
+            %}
+            {%- comment -%} limit 0 shows every colour: there is room here, unlike a card. {%- endcomment -%}
+            {% render 'dressar-colours',
+              product: product,
+              output: 'swatches',
+              limit: 0,
+              colour_word: s.colour_word,
+              colour_label: s.colour_label
+            %}
+          </div>
+        {%- endif -%}
 
         {%- comment -%}
           <product-form> must WRAP the form, not sit inside it: Dawn's element does
@@ -124,7 +177,17 @@
                 <legend class="dr-opt__legend">
                   <span>{{ option.name }}</span>
                   <span class="dr-opt__value" data-dr-option-value>{{ option.selected_value }}</span>
-                  {%- if is_size and s.size_guide_page != blank -%}
+                  {%- comment -%}
+                    The drawer wins when the product has a size chart, because it keeps
+                    the shopper on the page. The page link stays as the fallback for
+                    products with no chart yet. When neither exists nothing renders —
+                    a Size guide link that opens an empty drawer is worse than none.
+                  {%- endcomment -%}
+                  {%- if is_size and product.metafields.custom.size_chart.value != blank -%}
+                    <button type="button" class="dr-opt__guide" data-dr-guide-open>
+                      {{- s.size_guide_label -}}
+                    </button>
+                  {%- elsif is_size and s.size_guide_page != blank -%}
                     <a class="dr-opt__guide" href="{{ s.size_guide_page.url }}">{{ s.size_guide_label }}</a>
                   {%- endif -%}
                 </legend>
@@ -147,6 +210,17 @@
               </fieldset>
             {%- endfor -%}
           {%- endunless -%}
+
+          {%- comment -%}
+            Length sits here, immediately under the size choice, rather than in the
+            accordions. For a maxi skirt or a coat it is the measurement that decides
+            the purchase, and buried in a description nobody finds it.
+          {%- endcomment -%}
+          {% render 'dressar-product-details',
+            product: product,
+            output: 'length',
+            length_label: s.length_label
+          %}
 
           <p
             class="dr-pdp__stock"
@@ -211,6 +285,15 @@
         {%- if s.delivery_note != blank -%}
           <p class="dr-pdp__delivery">{{ s.delivery_note }}</p>
         {%- endif -%}
+
+        {% render 'dressar-product-details',
+          product: product,
+          heading: s.details_heading,
+          length_label: s.length_label,
+          model_label: s.model_label,
+          model_wears_label: s.model_wears_label,
+          advice_label: s.advice_label
+        %}
 
         <div class="dr-acc">
           {%- if product.description != blank -%}
@@ -344,14 +427,58 @@
 </script>
 
 {%- if s.enable_sticky_bar -%}
+  {%- comment -%}
+    A real submit, not a jump link. It targets the actual form, so with a size already
+    chosen it adds straight to the bag; with none chosen the existing submit guard
+    stops it, names the missing option and moves focus to the size grid.
+
+    Deliberately not a duplicate size picker in the bar. A second set of radios sharing
+    the name of the real ones would both post, and the browser would keep whichever
+    came last — so the shopper could see M selected in the bar and get L in the bag.
+  {%- endcomment -%}
   <div class="dr-stickybar" data-dr-sticky>
     <span class="dr-stickybar__title">{{ product.title }}</span>
-    <span class="dr-stickybar__price">{{ v.price | money }}</span>
-    <a class="dr-btn dr-btn--solid" href="#ProductSubmitButton-{{ section.id }}">
+    <span class="dr-stickybar__price" data-dr-sticky-price>{{ v.price | money }}</span>
+    <button
+      type="button"
+      class="dr-btn dr-btn--solid"
+      data-dr-sticky-add
+      data-form="{{ form_id }}"
+    >
       <span>{{ 'products.product.add_to_cart' | t }}</span>
-    </a>
+    </button>
   </div>
 {%- endif -%}
+
+{% render 'dressar-size-guide',
+  product: product,
+  trigger_label: s.size_guide_label,
+  close_label: s.close_label,
+  cm_label: s.cm_label,
+  in_label: s.in_label,
+  how_label: s.how_label,
+  body_label: s.body_label,
+  garment_label: s.garment_label,
+  notes_label: s.notes_label
+%}
+
+{%- comment -%}
+  One overlay for the whole page. The gallery fills it with whichever image was
+  tapped, so there is no second copy of every photograph in the markup.
+{%- endcomment -%}
+<div class="dr-zoom" data-dr-zoom-overlay hidden>
+  <button
+    type="button"
+    class="dr-zoom__close"
+    data-dr-zoom-close
+    aria-label="{{ s.close_label | escape }}"
+  >
+    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+      <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" stroke-width="1.4" fill="none"/>
+    </svg>
+  </button>
+  <img alt="" data-dr-zoom-image>
+</div>
 
 {% schema %}
 {
@@ -374,6 +501,24 @@
         { "value": "stack", "label": "Single column" }
       ]
     },
+    { "type": "header", "content": "Colours" },
+    { "type": "checkbox", "id": "show_colours", "label": "Show colour swatches", "info": "Shows every colour of the style, whether they are variants or separate products in a Product Family.", "default": true },
+    { "type": "text", "id": "colour_label", "label": "Colour label", "default": "Colour" },
+    { "type": "text", "id": "colour_word", "label": "Word for the colour count", "default": "colours" },
+    { "type": "header", "content": "Fit and details" },
+    { "type": "text", "id": "details_heading", "label": "Heading", "default": "Fit & details" },
+    { "type": "text", "id": "length_label", "label": "Garment length label", "info": "Shown directly under the size choice, where it decides the purchase.", "default": "Garment length" },
+    { "type": "text", "id": "model_label", "label": "Model height label", "default": "Model" },
+    { "type": "text", "id": "model_wears_label", "label": "Model size label", "default": "Model wears" },
+    { "type": "text", "id": "advice_label", "label": "Sizing advice label", "default": "Sizing" },
+    { "type": "header", "content": "Size guide" },
+    { "type": "text", "id": "cm_label", "label": "Centimetres label", "default": "cm" },
+    { "type": "text", "id": "in_label", "label": "Inches label", "default": "in" },
+    { "type": "text", "id": "how_label", "label": "How to measure heading", "default": "How to measure" },
+    { "type": "text", "id": "body_label", "label": "Body measurements heading", "default": "Body measurements" },
+    { "type": "text", "id": "garment_label", "label": "Garment measurements heading", "default": "Garment measurements" },
+    { "type": "text", "id": "notes_label", "label": "Fit notes heading", "default": "Fit notes" },
+    { "type": "text", "id": "close_label", "label": "Close control label", "info": "Read out by screen readers on the size guide and the enlarged image.", "default": "Close" },
     { "type": "header", "content": "Buying" },
     { "type": "checkbox", "id": "preselect", "label": "Pre-select the first option", "info": "Leave off so the customer must choose a size deliberately.", "default": false },
     { "type": "checkbox", "id": "show_dynamic_checkout", "label": "Show express payment buttons", "default": true },
