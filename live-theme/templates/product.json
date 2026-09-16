@@ -1,0 +1,137 @@
+{
+  "sections": {
+    "main": {
+      "type": "dressar-product",
+      "blocks": {
+        "fabric": {
+          "type": "metafield_row",
+          "settings": {
+            "heading": "Fabric & composition",
+            "key": "fabric_composition"
+          }
+        },
+        "fit": {
+          "type": "metafield_row",
+          "settings": {
+            "heading": "Fit & measurements",
+            "key": "fit_measurements"
+          }
+        },
+        "care": {
+          "type": "metafield_row",
+          "settings": {
+            "heading": "Care",
+            "key": "care_instructions"
+          }
+        },
+        "delivery": {
+          "type": "text_row",
+          "settings": {
+            "heading": "Delivery",
+            "content": "<p>Tracked delivery across the European Union. Delivery costs are calculated at checkout.</p>"
+          }
+        },
+        "returns": {
+          "type": "text_row",
+          "settings": {
+            "heading": "Returns",
+            "content": "<p>You have 14 days from delivery to cancel your order under EU law, without giving a reason. Items should be unworn with tags attached.</p>"
+          }
+        },
+        "eu": {
+          "type": "eu_info",
+          "settings": {
+            "heading": "Product information"
+          }
+        }
+      },
+      "block_order": [
+        "fabric",
+        "fit",
+        "care",
+        "delivery",
+        "returns",
+        "eu"
+      ],
+      "settings": {
+        "show_breadcrumb": true,
+        "eyebrow_source": "collection",
+        "gallery_layout": "grid",
+        "show_colours": true,
+        "colour_label": "Colour",
+        "colour_word": "colours",
+        "details_heading": "Fit & details",
+        "length_label": "Garment length",
+        "model_label": "Model",
+        "model_wears_label": "Model wears",
+        "advice_label": "Sizing",
+        "cm_label": "cm",
+        "in_label": "in",
+        "how_label": "How to measure",
+        "body_label": "Body measurements",
+        "garment_label": "Garment measurements",
+        "notes_label": "Fit notes",
+        "close_label": "Close",
+        "preselect": false,
+        "show_dynamic_checkout": true,
+        "validation_message": "Please choose a [option].",
+        "size_guide_label": "Size guide",
+        "delivery_note": "Delivered across the EU. 14-day right of withdrawal on every order.",
+        "enable_sticky_bar": true,
+        "color_scheme": "scheme-1",
+        "padding_top": 32,
+        "padding_bottom": 56
+      }
+    },
+    "complete_look": {
+      "type": "dressar-complete-look",
+      "settings": {
+        "heading": "Complete the look",
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "image_ratio": "portrait",
+        "show_swatches": true,
+        "meta_source": "type",
+        "color_scheme": "scheme-2",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "related": {
+      "type": "dressar-recommendations",
+      "settings": {
+        "heading": "You may also like",
+        "products_to_show": 4,
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "image_ratio": "portrait",
+        "show_swatches": true,
+        "meta_source": "type",
+        "color_scheme": "scheme-1",
+        "padding_top": 56,
+        "padding_bottom": 56
+      }
+    },
+    "recently_viewed": {
+      "type": "dressar-recently-viewed",
+      "settings": {
+        "heading": "Recently viewed",
+        "products_to_show": 6,
+        "columns_desktop": 6,
+        "columns_mobile": "2",
+        "image_ratio": "portrait",
+        "show_swatches": false,
+        "meta_source": "none",
+        "color_scheme": "scheme-1",
+        "padding_top": 48,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": [
+    "main",
+    "complete_look",
+    "related",
+    "recently_viewed"
+  ]
+}

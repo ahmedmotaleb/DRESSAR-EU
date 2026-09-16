@@ -1,0 +1,30 @@
+{%- comment -%}
+  A row of Dressar cards, used by every product-page module that shows other
+  products. Keeping it in one snippet is why recommendations, complete the look and
+  recently viewed cannot drift apart visually.
+
+  Accepts:
+    - items:        array of products
+    - ratio, meta_source, columns, mobile_columns
+    - show_swatches, swatch_limit
+{%- endcomment -%}
+
+<ul
+  class="dr-wrap dr-grid dr-rec__grid"
+  role="list"
+  style="--dr-cols: {{ columns | default: 4 }}; --dr-cols-tablet: {{ columns | default: 4 }}; --dr-cols-mobile: {{ mobile_columns | default: 2 }};"
+>
+  {%- for item in items -%}
+    <li>
+      {% render 'dressar-card',
+        card_product: item,
+        ratio: ratio,
+        show_second: true,
+        meta_source: meta_source,
+        index: forloop.index,
+        show_swatches: show_swatches,
+        swatch_limit: swatch_limit
+      %}
+    </li>
+  {%- endfor -%}
+</ul>

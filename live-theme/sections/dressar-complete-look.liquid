@@ -1,0 +1,85 @@
+{%- comment -%}
+  Complete the look.
+
+  The pieces styled together in the campaign photography, from
+  custom.complete_the_look. Entirely server-rendered: the merchant has already
+  chosen them, so there is nothing to compute and nothing to fetch.
+
+  Renders nothing when the metafield is empty, which is the normal state until the
+  styling is decided — an empty "Complete the look" heading is worse than no section.
+
+  Multi-product add is deliberately not built. The brief lists it as a later option,
+  and adding several sizes in one press needs a size chosen for each garment; doing
+  that silently would be choosing sizes for the shopper, which the rest of this
+  theme refuses to do.
+{%- endcomment -%}
+
+{{ 'dressar-sections.css' | asset_url | stylesheet_tag }}
+{{ 'dressar-card.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'dressar-card.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign s = section.settings
+  assign items = product.metafields.custom.complete_the_look.value
+-%}
+
+{%- if items != blank and items.size > 0 -%}
+  <div
+    class="dr-section dr-rec color-{{ s.color_scheme }} gradient"
+    style="--dr-pt: {{ s.padding_top }}px; --dr-pb: {{ s.padding_bottom }}px;"
+  >
+    {%- if s.heading != blank or s.text != blank -%}
+      <div class="dr-wrap dr-head">
+        {%- if s.heading != blank -%}<h2 class="dr-head__title">{{ s.heading }}</h2>{%- endif -%}
+        {%- if s.text != blank -%}<p class="dr-head__text">{{ s.text }}</p>{%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {% render 'dressar-product-rail',
+      items: items,
+      ratio: s.image_ratio,
+      meta_source: s.meta_source,
+      columns: s.columns_desktop,
+      mobile_columns: s.columns_mobile,
+      show_swatches: s.show_swatches,
+      swatch_limit: 4
+    %}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Complete the look",
+  "class": "section",
+  "settings": [
+    { "type": "paragraph", "content": "Shows the products in this product's \"Complete the look\" metafield. The whole section is hidden while that metafield is empty." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Complete the look" },
+    { "type": "textarea", "id": "text", "label": "Text" },
+    { "type": "range", "id": "columns_desktop", "min": 2, "max": 5, "step": 1, "label": "Columns on desktop", "default": 4 },
+    {
+      "type": "select", "id": "columns_mobile", "label": "Columns on mobile", "default": "2",
+      "options": [{ "value": "1", "label": "One" }, { "value": "2", "label": "Two" }]
+    },
+    {
+      "type": "select", "id": "image_ratio", "label": "Image ratio", "default": "portrait",
+      "options": [
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "45", "label": "Portrait (4:5)" },
+        { "value": "natural", "label": "Natural — no crop" }
+      ]
+    },
+    { "type": "checkbox", "id": "show_swatches", "label": "Show colour swatches", "default": true },
+    {
+      "type": "select", "id": "meta_source", "label": "Line above the title", "default": "type",
+      "options": [
+        { "value": "none", "label": "Nothing" },
+        { "value": "type", "label": "Product type" },
+        { "value": "fabric", "label": "Fabric metafield" }
+      ]
+    },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-2" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Top padding", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Bottom padding", "default": 64 }
+  ]
+}
+{% endschema %}
