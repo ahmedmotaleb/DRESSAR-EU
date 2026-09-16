@@ -42,19 +42,39 @@
     return input ? input.value : '';
   }
 
-  /* Only reorder when every value is recognisable, and only within one scheme.
-     A filter holding "One size", or a mix of "S" and "38", is left exactly as
-     Shopify sent it — a half-applied ladder is worse than none. */
-  function schemeFor(labels) {
-    if (!labels.length) return null;
+  function isNumericSize(label) {
+    return /^\d{1,3}$/.test(String(label).trim());
+  }
 
-    var allAlpha = labels.every(function (l) { return Object.prototype.hasOwnProperty.call(RANK, normalise(l)); });
-    if (allAlpha) return 'alpha';
+  /* Values are placed in three bands: recognised apparel sizes in ladder order,
+     then plain numeric sizes, then anything else — "One size", "Petite" — parked
+     at the end in the order Shopify sent it.
 
-    var allNumeric = labels.every(function (l) { return /^\d{1,3}$/.test(String(l).trim()); });
-    if (allNumeric) return 'numeric';
+     Ordering only the values that are actually sizes is what makes the ladder
+     usable on a real catalogue. An all-or-nothing rule reads as the safer choice
+     until you meet a real size filter: this shop's assortment mixes M–3XL with
+     "One size", which is enough to disable the ladder entirely and leave the whole
+     filter alphabetical. Sizes in size order followed by "One size" is right; it
+     is the half-applied ladder that never arrives. */
+  var NUMERIC_BASE = 100;
+  var UNKNOWN_BASE = 2000;
 
-    return null;
+  function rankOf(label, index) {
+    var key = normalise(label);
+    if (Object.prototype.hasOwnProperty.call(RANK, key)) return RANK[key];
+    if (isNumericSize(label)) return NUMERIC_BASE + parseInt(String(label).trim(), 10);
+    return UNKNOWN_BASE + index;
+  }
+
+  /* Two recognised values is the fewest that can be out of order, and requiring a
+     majority keeps the ladder off a filter that merely happens to contain one
+     size-shaped word. */
+  function shouldOrder(labels) {
+    var known = 0;
+    labels.forEach(function (l) {
+      if (Object.prototype.hasOwnProperty.call(RANK, normalise(l)) || isNumericSize(l)) known += 1;
+    });
+    return known >= 2 && known * 2 >= labels.length;
   }
 
   function orderFilter(details) {
@@ -65,9 +85,8 @@
     if (items.length < 2) return;
 
     var labels = items.map(labelOf);
-    var scheme = schemeFor(labels);
 
-    if (!scheme) {
+    if (!shouldOrder(labels)) {
       details.classList.remove('dr-facet--sizes');
       items.forEach(function (item) { item.style.order = ''; });
       return;
@@ -75,8 +94,7 @@
 
     details.classList.add('dr-facet--sizes');
     items.forEach(function (item, i) {
-      var value = scheme === 'alpha' ? RANK[normalise(labels[i])] : parseInt(labels[i], 10);
-      item.style.order = String(value);
+      item.style.order = String(rankOf(labels[i], i));
     });
   }
 
