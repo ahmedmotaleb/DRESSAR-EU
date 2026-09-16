@@ -10,6 +10,28 @@ Shopify is the source of truth. Every file here was verified byte-identical to
 the live theme by MD5 at the time of commit. When you change one, upload it with
 `themeFilesUpsert` and check the returned `checksumMd5` against the local file.
 
+## PENDING UPLOAD — read this first
+
+Phase D is committed here but **not on the theme**. `switch-shop` was called from
+this remote session at the user's explicit request, which revoked the token; the
+replacement is only minted for a new session, so the connector could not recover in
+place. Upload these four files with `themeFilesUpsert` and check each returned
+`checksumMd5` against the local file:
+
+| File | Bytes | MD5 |
+| --- | --- | --- |
+| `assets/dressar-facets.css` | 7013 | `c2f335372a46c18d3ad46fee2526dca8` |
+| `assets/dressar-facets.js` | 4892 | `a54cd6a170f140a3c690809e1f20568e` |
+| `sections/dressar-collection.liquid` | 18321 | `7ad3c4c4b01d3560880a8397244ad236` |
+| `sections/dressar-search.liquid` | 12194 | `c669bed0ae7b447f168c208290b66da9` |
+
+Phases A, B and C are already live and verified.
+
+**Phase D's CSS has never been rendered in a browser.** It overrides
+component-facets.css to move Dawn's drawer to the left and restyle its internals,
+and it is the one part of this work that genuinely needs eyes on a real page before
+it can be trusted. Check it at 390px and at 1440px with a filter open.
+
 ## Connected store
 
 The connector has silently drifted to the Egyptian store `dnx31m-mi` / `dressar.co`

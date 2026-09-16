@@ -1,0 +1,193 @@
+/* Filter drawer.
+
+   Dawn already ships a working drawer in `drawer` filter mode: a <details> whose
+   <summary> is the FILTER control, a #FacetFiltersFormMobile inside it, and a
+   footer holding CLEAR ALL and the apply button. facets.js reads all of it by id
+   and class. So this file moves and restyles that drawer — it never replaces it,
+   and every selector here is scoped under .dr-toolbar so Dawn's own facets styling
+   stays intact anywhere else it is used.
+
+   Everything is written to override component-facets.css, which is linked ahead of
+   this file by both shopping sections. Where a declaration has to win, it wins on
+   specificity rather than on source order, because the load order of two linked
+   stylesheets is not something to build on. */
+
+/* ---- the panel ---- */
+/* Full-bleed on a phone; a left-hand panel from tablet up. Left rather than right
+   because the shopper's eye is already at the FILTER control on that side of the
+   toolbar, and because the grid stays visible to the right while they choose. */
+.dr-toolbar .mobile-facets__wrapper .mobile-facets {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 70;
+  width: 100%;
+  max-width: none;
+  transform: translateX(-100%);
+  transition: transform .3s ease;
+}
+@media screen and (min-width: 750px) {
+  .dr-toolbar .mobile-facets__wrapper .mobile-facets { width: clamp(38rem, 32vw, 44rem); }
+}
+[dir='rtl'] .dr-toolbar .mobile-facets__wrapper .mobile-facets { transform: translateX(100%); }
+
+.dr-toolbar .mobile-facets__disclosure[open] .mobile-facets { transform: none; }
+
+.dr-toolbar .mobile-facets__inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: none;
+  background: rgb(var(--color-background));
+  border: 0;
+}
+
+/* Dawn's drawer has no scrim of its own in this mode. Without one the page behind
+   stays fully legible and the panel reads as part of the grid rather than over it. */
+.dr-toolbar .mobile-facets__disclosure[open]::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 69;
+  background: rgba(0, 0, 0, .34);
+}
+
+/* ---- header ---- */
+.dr-toolbar .mobile-facets__header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 2rem 2.4rem 1.6rem;
+  border-bottom: 1px solid rgba(var(--color-foreground), .12);
+  background: rgb(var(--color-background));
+}
+.dr-toolbar .mobile-facets__heading {
+  margin: 0;
+  font-size: 1.3rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.dr-toolbar .mobile-facets__count { margin: .4rem 0 0; font-size: 1.2rem; opacity: .6; }
+.dr-toolbar .mobile-facets__close {
+  position: absolute;
+  top: 1.2rem;
+  inset-inline-end: 1.2rem;
+  width: 4.4rem;
+  height: 4.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- one filter ---- */
+.dr-toolbar .mobile-facets__details { border-bottom: 1px solid rgba(var(--color-foreground), .1); }
+.dr-toolbar .mobile-facets__summary {
+  padding: 1.8rem 2.4rem;
+  font-size: 1.2rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.dr-toolbar .mobile-facets__submenu {
+  position: static;
+  height: auto;
+  padding: 0 2.4rem 2rem;
+  transform: none;
+  background: transparent;
+}
+/* Dawn's submenu is a slide-over panel on mobile with its own back button. Here every
+   filter is an accordion in one column, so the back button is redundant furniture. */
+.dr-toolbar .mobile-facets__close-button { display: none; }
+
+.dr-toolbar .mobile-facets__list { margin: 0; padding: 0; }
+.dr-toolbar .mobile-facets__item { padding: 0; }
+.dr-toolbar .mobile-facets__label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .9rem 0;
+  min-height: 4.4rem;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.dr-toolbar .facet-checkbox__text-label { font-size: 1.4rem; }
+.dr-toolbar .mobile-facets__label.disabled { opacity: .35; cursor: default; }
+
+/* ---- sizes as buttons ---- */
+/* Applied by dressar-facets.js, and only to a filter whose values are all
+   recognisable sizes. Anything it cannot read — "One size", mixed schemes — keeps
+   the ordinary checkbox list, because a half-applied size grid is worse than none. */
+.dr-toolbar .dr-facet--sizes .mobile-facets__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .8rem;
+}
+.dr-toolbar .dr-facet--sizes .mobile-facets__item { flex: none; }
+.dr-toolbar .dr-facet--sizes .mobile-facets__label {
+  justify-content: center;
+  min-width: 5.6rem;
+  min-height: 4.4rem;
+  padding: 0 1.2rem;
+  border: 1px solid rgba(var(--color-foreground), .28);
+  font-size: 1.3rem;
+  letter-spacing: .06em;
+}
+.dr-toolbar .dr-facet--sizes .mobile-facets__label.active {
+  border-color: rgb(var(--color-foreground));
+  background: rgba(var(--color-foreground), .06);
+}
+/* The checkbox itself is hidden only once it is inside a label that replaces it
+   visually — the label is still the control, and it keeps its own focus ring. */
+.dr-toolbar .dr-facet--sizes .mobile-facets__checkbox { position: absolute; opacity: 0; width: 0; height: 0; }
+.dr-toolbar .dr-facet--sizes .mobile-facets__checkbox:focus-visible + .facet-checkbox__text,
+.dr-toolbar .dr-facet--sizes .mobile-facets__label:focus-within {
+  outline: 2px solid rgb(var(--color-foreground));
+  outline-offset: 2px;
+}
+/* The per-value product count is noise inside a size chip; the disabled state
+   already says whether anything is there. */
+.dr-toolbar .dr-facet--sizes .facet-checkbox__text { display: inline; }
+.dr-toolbar .dr-facet--sizes .mobile-facets__label.disabled { text-decoration: line-through; }
+
+/* ---- colour swatches ---- */
+/* Presentation comes from Search & Discovery, not from here: a filter set to
+   "swatch" already renders Shopify's own swatch data through Dawn's swatch snippet.
+   This only sizes it for a drawer this width. */
+.dr-toolbar .facets-layout-grid--swatch { display: flex; flex-wrap: wrap; gap: 1.2rem 1.6rem; }
+.dr-toolbar .facets-layout-grid--swatch .mobile-facets__label { flex-direction: column; gap: .5rem; padding: 0; }
+.dr-toolbar .swatch-input__label { width: 3.2rem; height: 3.2rem; }
+
+/* ---- footer ---- */
+/* Pinned, so CLEAR and the count are reachable without scrolling back up a long
+   list of filters. */
+.dr-toolbar .mobile-facets__footer {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 1.6rem 2.4rem calc(1.6rem + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(var(--color-foreground), .12);
+  background: rgb(var(--color-background));
+}
+.dr-toolbar .mobile-facets__clear {
+  font-size: 1.2rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.dr-toolbar .mobile-facets__footer .button--primary {
+  flex: 1;
+  min-height: 5rem;
+  border-radius: 0;
+  font-size: 1.2rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+/* The filter list scrolls; header and footer do not. */
+.dr-toolbar .mobile-facets__main { flex: 1; overflow-y: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dr-toolbar .mobile-facets__wrapper .mobile-facets { transition: none; }
+}

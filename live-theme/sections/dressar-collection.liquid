@@ -11,7 +11,14 @@
 {{ 'dressar-card.css' | asset_url | stylesheet_tag }}
 {{ 'dressar-shop.css' | asset_url | stylesheet_tag }}
 {{ 'component-facets.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  dressar-facets.css comes after component-facets.css so its overrides land last,
+  but every rule in it is also scoped under .dr-toolbar so it wins on specificity
+  rather than relying on that order.
+{%- endcomment -%}
+{{ 'dressar-facets.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'dressar-facets.js' | asset_url }}" defer="defer"></script>
 {%- comment -%}
   Card assets are loaded once here by the section, not inside the card snippet, which
   would emit the same <link> twenty-four times in a full grid.
@@ -60,6 +67,7 @@
         {%- endcomment -%}
         <aside
           aria-label="{{ s.toolbar_label | escape }}"
+          data-dr-facets-show-label="{{ s.facets_show_label | escape }}"
           class="facets-wrapper dr-wrap dr-wrap--shop dr-toolbar{% if s.sticky_toolbar %} dr-toolbar--sticky{% endif %}{% unless s.enable_filtering %} facets-wrapper--no-filters{% endunless %}"
           id="main-collection-filters"
           data-id="{{ section.id }}"
@@ -300,6 +308,7 @@
         { "value": "drawer", "label": "Drawer" }
       ]
     },
+    { "type": "text", "id": "facets_show_label", "label": "Apply button wording", "info": "Joined to the live count, e.g. “Show 68 products”. Leave empty to keep Shopify’s own wording.", "default": "Show" },
     { "type": "checkbox", "id": "enable_sorting", "label": "Enable sorting", "default": true },
     { "type": "header", "content": "Section" },
     { "type": "color_scheme", "id": "color_scheme", "label": "Colour scheme", "default": "scheme-1" },
