@@ -33,13 +33,17 @@
     }
   }
 
-  /* Record on any page carrying a product id, which is the product page. Moving an
-     already-seen product back to the front keeps the order genuinely "recent"
-     rather than "first seen". */
-  function record() {
-    var el = document.querySelector('[data-product-id]');
-    if (!el) return;
-    var id = el.getAttribute('data-product-id');
+  /* The id comes from the section's own data-current, which Liquid rendered from
+     the product whose page this is. Taking it from the first [data-product-id] in
+     the document instead would make what gets recorded depend on section order —
+     a card's wishlist button and the recommendations section both carry that same
+     attribute, so reordering sections in the theme editor could quietly start
+     recording the wrong product.
+
+     Moving an already-seen product back to the front keeps the order genuinely
+     "recent" rather than "first seen". */
+  function record(root) {
+    var id = root.getAttribute('data-current');
     if (!id) return;
 
     var list = read().filter(function (existing) { return String(existing) !== String(id); });
@@ -47,10 +51,7 @@
     write(list.slice(0, KEEP));
   }
 
-  function render() {
-    var root = document.querySelector('[data-dr-recent]');
-    if (!root) return;
-
+  function render(root) {
     var current = root.getAttribute('data-current');
     var limit = parseInt(root.getAttribute('data-limit'), 10) || 6;
 
@@ -64,9 +65,15 @@
       .map(function (id) { return 'id:' + encodeURIComponent(id); })
       .join('+OR+');
 
+    /* prefix=none matters here. Storefront search defaults to partial-matching the
+       last term, and the last term in this query is an id — so the default would
+       let "id:123" also match 1234. */
     var url =
       '/search?section_id=' + encodeURIComponent(root.getAttribute('data-section-id')) +
-      '&type=product&options%5Bunavailable_products%5D=last&q=' + query;
+      '&type=product' +
+      '&options%5Bprefix%5D=none' +
+      '&options%5Bunavailable_products%5D=last' +
+      '&q=' + query;
 
     fetch(url)
       .then(function (response) {
@@ -89,8 +96,10 @@
   }
 
   function start() {
-    record();
-    render();
+    var root = document.querySelector('[data-dr-recent]');
+    if (!root) return;
+    record(root);
+    render(root);
   }
 
   if (document.readyState === 'loading') {

@@ -7,6 +7,7 @@ Or individually:
 
     node tests/ladder.test.js        # size-filter ordering        (no dependencies)
     node tests/card.test.js          # product card behaviour      (needs jsdom)
+    node tests/recent.test.js        # recently viewed             (needs jsdom)
     python3 tests/liquid-balance.py  # Liquid tag balance          (no dependencies)
 
 `package.json` and `node_modules/` are test tooling only. The theme is uploaded
@@ -36,6 +37,23 @@ a reduction on a garment that is not reduced, which is a price claim, not a
 cosmetic bug. The test also pins that the badge is never invented on a card where
 the merchant turned the discount display off, and that the three price parts end up
 in the order the card first rendered them — now, was, then the percentage.
+
+## recent.test.js
+
+Runs `assets/dressar-recently-viewed.js` in jsdom with a stubbed `fetch` and a
+stubbed `localStorage`, and asserts what gets stored and what gets requested.
+
+Two cases carry most of the weight. The first is the decoy: the markup includes a
+product card's wishlist button, which carries `data-product-id` just as the main
+product section does. The script must record the product whose page this is, taken
+from the section's own `data-current`, never whichever `[data-product-id]` happens
+to come first in the document — otherwise reordering sections in the theme editor
+silently changes what gets recorded. The second pins the search URL exactly,
+including `options[prefix]=none`: storefront search partial-matches the last term
+by default, and the last term here is an id.
+
+The storage stub also throws on demand, which is what private browsing modes do
+rather than returning null.
 
 ## liquid-balance.py
 
