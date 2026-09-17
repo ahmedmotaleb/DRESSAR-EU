@@ -43,6 +43,17 @@
   if shown > 0 and hidden >= shown
     assign is_overflow = true
   endif
+
+  comment
+    The percentage is worked out here, where the raw numbers are, rather than in
+    JavaScript from the formatted strings above — those carry a currency symbol and
+    the shopper's own separators, and parsing them back to numbers would be wrong
+    in some locales and silently wrong in others.
+  endcomment
+  assign off_percent = 0
+  if compare_at > price and compare_at > 0
+    assign off_percent = compare_at | minus: price | times: 100.0 | divided_by: compare_at | round
+  endif
 -%}
 
 <a
@@ -58,7 +69,7 @@
     data-alt="{{ media.alt | default: title | escape }}"
   {% endif %}
   data-price="{{ price | money }}"
-  {% if compare_at > price %}data-compare="{{ compare_at | money }}"{% endif %}
+  {% if compare_at > price %}data-compare="{{ compare_at | money }}" data-off="{{ off_percent }}"{% endif %}
   {% if is_current %}aria-current="true"{% endif %}
 >
   {%- if has_chip -%}

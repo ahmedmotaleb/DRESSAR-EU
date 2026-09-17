@@ -171,13 +171,13 @@
       {% render 'dressar-colours', product: p, output: 'label', colour_word: colour_word, colour_label: colour_label %}
     {%- endif -%}
 
-    <p class="dr-card__price" data-dr-card-price>
+    <p class="dr-card__price" data-dr-card-price{% if show_discount %} data-dr-show-discount{% endif %}>
       {%- if on_sale -%}
         <span class="dr-card__price-now" data-dr-price-now>{{ p.price | money }}</span>
         <s class="dr-card__price-was" data-dr-price-was>{{ p.compare_at_price | money }}</s>
         {%- if show_discount -%}
           {%- assign off = p.compare_at_price | minus: p.price | times: 100.0 | divided_by: p.compare_at_price | round -%}
-          <span class="dr-card__price-off">−{{ off }}%</span>
+          <span class="dr-card__price-off" data-dr-price-off>−{{ off }}%</span>
         {%- endif -%}
       {%- elsif p.price_varies -%}
         {%- assign from_price = p.price | money -%}

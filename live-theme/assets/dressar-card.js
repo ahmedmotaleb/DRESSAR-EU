@@ -40,21 +40,44 @@
     var now = root.querySelector('[data-dr-price-now]');
     if (now) now.textContent = swatch.getAttribute('data-price') || now.textContent;
 
-    /* The compare-at is per colour: one colour can be reduced while another is not,
-       so the strike-through is added and removed rather than merely re-filled. */
+    /* Reductions are per colour: one colour can be reduced while another is not, so
+       the strike-through and the discount badge are both added and removed rather
+       than merely re-filled, and both are re-appended so the card rebuilds in the
+       order it first rendered — now, was, then the percentage. */
     var priceWrap = root.querySelector('[data-dr-card-price]');
     var was = root.querySelector('[data-dr-price-was]');
+    var off = root.querySelector('[data-dr-price-off]');
     var compare = swatch.getAttribute('data-compare');
+    var percent = swatch.getAttribute('data-off');
+
     if (compare && priceWrap) {
       if (!was) {
         was = document.createElement('s');
         was.className = 'dr-card__price-was';
         was.setAttribute('data-dr-price-was', '');
-        priceWrap.appendChild(was);
       }
+      priceWrap.appendChild(was);
       was.textContent = compare;
     } else if (was) {
       was.remove();
+    }
+
+    /* Removing this when the new colour is not reduced is the whole point of it
+       being here: a percentage left over from the previous colour is a reduction
+       claim about a garment that is not reduced. The badge is only ever shown on a
+       card the merchant switched it on for, which is what the flag on the wrapper
+       records — the element itself is absent whenever the first colour rendered at
+       full price, so its presence cannot be used to infer the setting. */
+    if (compare && percent && priceWrap && priceWrap.hasAttribute('data-dr-show-discount')) {
+      if (!off) {
+        off = document.createElement('span');
+        off.className = 'dr-card__price-off';
+        off.setAttribute('data-dr-price-off', '');
+      }
+      priceWrap.appendChild(off);
+      off.textContent = '−' + percent + '%';
+    } else if (off) {
+      off.remove();
     }
 
     var label = root.querySelector('[data-dr-colour-name]');

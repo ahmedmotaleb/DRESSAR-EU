@@ -1,9 +1,16 @@
 # Checks
 
-Two standalone checks. No dependencies, no install step.
+    npm install            # once, for jsdom
+    npm test               # all three
 
-    node tests/ladder.test.js      # size-filter ordering
-    python3 tests/liquid-balance.py  # Liquid tag balance across sections/ and snippets/
+Or individually:
+
+    node tests/ladder.test.js        # size-filter ordering        (no dependencies)
+    node tests/card.test.js          # product card behaviour      (needs jsdom)
+    python3 tests/liquid-balance.py  # Liquid tag balance          (no dependencies)
+
+`package.json` and `node_modules/` are test tooling only. The theme is uploaded
+file by file through the Admin API, so Shopify never sees either.
 
 ## ladder.test.js
 
@@ -15,6 +22,20 @@ size values alphabetically — `2XL, 3XL, L, M, One size, XL` — and the assort
 mixes lettered sizes with `One size`. The remaining cases pin the guards: a filter
 of availability, product type or fabric values must come back untouched, because
 the ordering runs over every `.js-filter` in the drawer, not only the size one.
+
+## card.test.js
+
+Runs `assets/dressar-card.js` in jsdom against markup that mirrors what
+`snippets/dressar-card.liquid` emits, and asserts what a colour swap does to the
+card.
+
+The case worth keeping is the price. A reduction belongs to one colour, not to the
+product: switching from a reduced colour to a full-price one has to remove the
+strike-through *and* the percentage badge together. Leaving the badge behind states
+a reduction on a garment that is not reduced, which is a price claim, not a
+cosmetic bug. The test also pins that the badge is never invented on a card where
+the merchant turned the discount display off, and that the three price parts end up
+in the order the card first rendered them — now, was, then the percentage.
 
 ## liquid-balance.py
 

@@ -1,0 +1,11 @@
+{
+  "name": "dressar-theme-checks",
+  "private": true,
+  "description": "Test tooling for the Dressar theme. Not part of the theme upload — Shopify never sees this file.",
+  "scripts": {
+    "test": "node tests/ladder.test.js && node tests/card.test.js && python3 tests/liquid-balance.py"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0"
+  }
+}

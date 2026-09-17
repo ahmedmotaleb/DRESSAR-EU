@@ -16,16 +16,28 @@
     - label:    accessible name for the group
     - desktop:  merchant default for wide screens
     - mobile:   merchant default for small screens
+
+  Both defaults are compared as strings. "Columns on desktop" is a range setting so
+  it arrives as a number, but "Columns on mobile" is a select, so it arrives as the
+  string "2" — and Liquid does not coerce across types, so 2 == "2" is false. Left
+  as a bare comparison the mobile group renders with nothing pressed at all, and a
+  screen reader announces two toggle buttons with no way to tell which is current.
 {%- endcomment -%}
+
+{%- liquid
+  assign desktop_default = desktop | append: ''
+  assign mobile_default = mobile | append: ''
+-%}
 
 <div class="dr-density" data-dr-density role="group" aria-label="{{ label | default: 'Grid view' | escape }}">
   {%- for n in (3..5) -%}
+    {%- assign value = n | append: '' -%}
     <button
       type="button"
       class="dr-density__btn dr-density__btn--wide"
       data-dr-density-set="{{ n }}"
       data-scope="desktop"
-      aria-pressed="{% if n == desktop %}true{% else %}false{% endif %}"
+      aria-pressed="{% if value == desktop_default %}true{% else %}false{% endif %}"
     >
       <span class="visually-hidden">{{ n }}</span>
       {%- for i in (1..n) -%}<span class="dr-density__bar" aria-hidden="true"></span>{%- endfor -%}
@@ -33,12 +45,13 @@
   {%- endfor -%}
 
   {%- for n in (1..2) -%}
+    {%- assign value = n | append: '' -%}
     <button
       type="button"
       class="dr-density__btn dr-density__btn--narrow"
       data-dr-density-set="{{ n }}"
       data-scope="mobile"
-      aria-pressed="{% if n == mobile %}true{% else %}false{% endif %}"
+      aria-pressed="{% if value == mobile_default %}true{% else %}false{% endif %}"
     >
       <span class="visually-hidden">{{ n }}</span>
       {%- for i in (1..n) -%}<span class="dr-density__bar" aria-hidden="true"></span>{%- endfor -%}
