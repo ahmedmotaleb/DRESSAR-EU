@@ -8,6 +8,7 @@ Or individually:
     node tests/ladder.test.js        # size-filter ordering        (no dependencies)
     node tests/card.test.js          # product card behaviour      (needs jsdom)
     node tests/recent.test.js        # recently viewed             (needs jsdom)
+    node tests/sticky.test.js        # one sticky bar, not two     (needs jsdom)
     python3 tests/liquid-balance.py  # Liquid tag balance          (no dependencies)
 
 `package.json` and `node_modules/` are test tooling only. The theme is uploaded
@@ -54,6 +55,22 @@ by default, and the last term here is an id.
 
 The storage stub also throws on demand, which is what private browsing modes do
 rather than returning null.
+
+## sticky.test.js
+
+`assets/product-form.js` holds two things: Dawn's `ProductForm` element, which owns
+add to cart, and an older Dressar sticky add-to-cart bar appended after it.
+
+That bar predates the current product page and does not know about it. It finds a
+button by `[name="add"]` inside `<product-form>`, which this product page has, and
+its only guard is a check for its own class — so it was adding a second fixed bar
+underneath the section's own, with an empty price, because the price it reads is
+Dawn's markup and this page does not use it.
+
+The test loads the real file and asserts one bar on the Dressar product page and
+no legacy stylesheet there, while a plain Dawn product form still gets the bar it
+always had, price included. That second half is the point of a guard rather than a
+deletion: the older bar still does a job on surfaces this theme has not replaced.
 
 ## liquid-balance.py
 
