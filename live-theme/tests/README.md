@@ -12,6 +12,8 @@ Or individually:
     node tests/product.test.js       # product page                (needs jsdom)
     node tests/quickadd.test.js      # quick add sheet             (needs jsdom)
     node tests/grid.test.js          # grid density                (needs jsdom)
+    node tests/consent.test.js       # cookie consent              (needs jsdom)
+    node tests/header.test.js        # header, drawer, sticky      (needs jsdom)
     python3 tests/liquid-balance.py  # Liquid tag balance          (no dependencies)
 
 `package.json` and `node_modules/` are test tooling only. The theme is uploaded
@@ -108,6 +110,49 @@ Runs `assets/dressar-grid.js`. The case that justifies the file's design is the
 fourth: the column count is written to the section wrapper, not to the `<ul>`,
 because Dawn's `facets.js` replaces `#ProductGridContainer` wholesale on every
 filter change. The test performs that replacement and asserts the choice survives.
+
+## consent.test.js
+
+Runs `assets/dressar-consent.js` against a stubbed Customer Privacy API. This one
+gates analytics and marketing for an EU store, so every assertion is about what
+gets sent, not about how the banner looks.
+
+The rule it holds the script to: nothing non-essential is on until the visitor
+turns it on, and every category is stated explicitly in the payload rather than
+left out for Shopify to default. It also checks the banner stays hidden where
+Shopify says consent is not required, that reopening from the footer shows what
+was actually stored rather than the defaults, and that a privacy API which fails
+to load results in asking the visitor rather than assuming an answer.
+
+One behaviour is pinned because it is a decision, not an accident: ticking
+Marketing also consents to `sale_of_data`. That is a CCPA concept rather than a
+GDPR one and there is no separate control for it, so the test records the coupling
+where someone will find it.
+
+## header.test.js
+
+Runs `assets/dressar-header.js`. jsdom has no layout — every box measures zero and
+`offsetParent` is always null — so the test stubs both, otherwise the height
+publishing and the drawer's focus trap would silently do nothing and still pass.
+
+The first two cases are the ones that matter: a sticky header publishes its height
+into `--dr-header-height` so the collection toolbar can sit underneath it, and a
+header the merchant has unstuck publishes `0` rather than leaving a header-sized
+gap at the top of the page. The rest covers the drawer — state, scrim, scroll lock,
+focus in on open and back to the menu button on Escape — and the overlay header
+going solid past its threshold and back again.
+
+## dressar-rail.js is deliberately not covered
+
+Everything it does is layout measurement: `scrollWidth`, `clientWidth`,
+`scrollLeft`, `getBoundingClientRect`. jsdom reports all of them as zero, so a test
+here would assert nothing while looking like coverage. It needs a real browser.
+
+Worth knowing when one is available: `scrollBy` flips direction for right-to-left,
+but `sync` does not — the at-start and at-end checks read `scrollLeft` as if it
+were always left-to-right. English is the only published language on this store, so
+that cannot be reached today; it becomes real the moment Arabic or Hebrew is
+published.
 
 ## liquid-balance.py
 
