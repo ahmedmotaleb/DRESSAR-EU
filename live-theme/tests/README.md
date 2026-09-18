@@ -9,6 +9,9 @@ Or individually:
     node tests/card.test.js          # product card behaviour      (needs jsdom)
     node tests/recent.test.js        # recently viewed             (needs jsdom)
     node tests/sticky.test.js        # one sticky bar, not two     (needs jsdom)
+    node tests/product.test.js       # product page                (needs jsdom)
+    node tests/quickadd.test.js      # quick add sheet             (needs jsdom)
+    node tests/grid.test.js          # grid density                (needs jsdom)
     python3 tests/liquid-balance.py  # Liquid tag balance          (no dependencies)
 
 `package.json` and `node_modules/` are test tooling only. The theme is uploaded
@@ -71,6 +74,40 @@ The test loads the real file and asserts one bar on the Dressar product page and
 no legacy stylesheet there, while a plain Dawn product form still gets the bar it
 always had, price included. That second half is the point of a guard rather than a
 deletion: the older bar still does a job on surfaces this theme has not replaced.
+
+## product.test.js
+
+Runs `assets/dressar-product.js` against markup mirroring
+`sections/dressar-product.liquid`, with this shop's real data: one Size option
+running M to 3XL, and the real money format `€{{amount_with_comma_separator}}`,
+which puts the decimal comma and the thousands dot the European way round.
+
+What it pins: no size is chosen for the shopper and submitting without one is
+blocked, names the option and moves focus to the grid; picking a size updates the
+variant id, the price, the SKU, the URL and the sticky bar's price together; a
+sold-out size disables the button and says so, and picking an available one
+afterwards puts it back; and the low-stock line appears only on real inventory at
+or below three, never as a nudge.
+
+## quickadd.test.js
+
+Runs `assets/dressar-quick-add.js` with a stubbed fetch. The add itself is Dawn's
+and is not exercised — what matters here is the request, the sheet, and sizes.
+
+It checks the request strips any variant query and asks for the section; that a
+multi-size product opens the sheet with the merchant's own wording and nothing
+preselected; that a single-variant product adds without opening a sheet at all;
+that adding without a size is blocked, explained, and focuses the first size that
+can actually be bought rather than a sold-out one; and that a failed request
+leaves the sheet shut and falls through to the product page rather than stranding
+the shopper on a dead "+".
+
+## grid.test.js
+
+Runs `assets/dressar-grid.js`. The case that justifies the file's design is the
+fourth: the column count is written to the section wrapper, not to the `<ul>`,
+because Dawn's `facets.js` replaces `#ProductGridContainer` wholesale on every
+filter change. The test performs that replacement and asserts the choice survives.
 
 ## liquid-balance.py
 
